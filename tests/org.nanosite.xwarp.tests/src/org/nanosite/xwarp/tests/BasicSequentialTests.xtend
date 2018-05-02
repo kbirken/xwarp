@@ -28,7 +28,7 @@ class BasicSequentialTests extends TestBase {
 			addInitial(consumer1.behaviors.head)
 		]
 		
-		// create simulator and start simulation
+		// create simulator and run simulation
 		val result = simulate(model, 1, false)
 		result.check("Comp1::Bhvr1::S1", 0, 0, 3000)
 	}
@@ -57,7 +57,7 @@ class BasicSequentialTests extends TestBase {
 			addInitial(consumer1.behaviors.head)
 		]
 		
-		// create simulator and start simulation
+		// create simulator and run simulation
 		val result = simulate(model, 2, false)
 		result.check("Bhvr1::S1", 0, 0, 2000)
 		result.check("Bhvr1::S2", 2000, 2000, 5000)

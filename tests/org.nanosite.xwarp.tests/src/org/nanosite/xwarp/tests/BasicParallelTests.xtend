@@ -34,7 +34,7 @@ class BasicParallelTests extends TestBase {
 			addInitial(consumer1.behaviors.head, consumer2.behaviors.head)
 		]
 		
-		// create simulator and start simulation
+		// create simulator and run simulation
 		val result = simulate(model, 2, false)
 		result.check("C1B1S1", 0, 0, 2000)
 		result.check("C2B1S1", 0, 0, 2000)
@@ -68,7 +68,7 @@ class BasicParallelTests extends TestBase {
 			addInitial(consumer1.behaviors.head, consumer2.behaviors.head)
 		]
 		
-		// create simulator and start simulation
+		// create simulator and run simulation
 		val result = simulate(model, 2, false)
 		result.check("C1B1S1", 0, 0, 2000)
 		result.check("C2B1S1", 0, 0, 3000)
@@ -103,7 +103,7 @@ class BasicParallelTests extends TestBase {
 			addInitial(consumer1.behaviors.head, consumer2.behaviors.head)
 		]
 		
-		// create simulator and start simulation
+		// create simulator and run simulation
 		val result = simulate(model, 3, false)
 		result.check("C1B1S1", 0, 0, 2000)
 		result.check("C1B1S2", 2000, 2000, 4000)
