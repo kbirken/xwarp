@@ -1,4 +1,4 @@
-package org.nanosite.xwarp.model
+package org.nanosite.xwarp.model.impl
 
 import com.google.common.collect.ImmutableList
 import java.util.List

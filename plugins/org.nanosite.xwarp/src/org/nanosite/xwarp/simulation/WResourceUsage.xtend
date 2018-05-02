@@ -1,7 +1,7 @@
 package org.nanosite.xwarp.simulation
 
 import java.util.List
-import org.nanosite.xwarp.model.WResource
+import org.nanosite.xwarp.model.impl.WResource
 
 class WResourceUsage {
 	

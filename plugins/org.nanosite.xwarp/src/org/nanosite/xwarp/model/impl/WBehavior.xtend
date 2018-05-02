@@ -1,4 +1,4 @@
-package org.nanosite.xwarp.model
+package org.nanosite.xwarp.model.impl
 
 import java.util.List
 import org.nanosite.xwarp.model.api.IBehavior

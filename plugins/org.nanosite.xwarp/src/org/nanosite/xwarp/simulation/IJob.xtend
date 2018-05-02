@@ -1,7 +1,7 @@
 package org.nanosite.xwarp.simulation
 
 import java.util.Map
-import org.nanosite.xwarp.model.WResource
+import org.nanosite.xwarp.model.impl.WResource
 
 interface IJob {
 

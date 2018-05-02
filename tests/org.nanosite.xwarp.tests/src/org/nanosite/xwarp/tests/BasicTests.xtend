@@ -1,11 +1,11 @@
 package org.nanosite.xwarp.tests
 
 import org.junit.Test
-import org.nanosite.xwarp.model.WBehavior
-import org.nanosite.xwarp.model.WConsumer
-import org.nanosite.xwarp.model.WModel
-import org.nanosite.xwarp.model.WProcessor
-import org.nanosite.xwarp.model.WStep
+import org.nanosite.xwarp.model.impl.WBehavior
+import org.nanosite.xwarp.model.impl.WConsumer
+import org.nanosite.xwarp.model.impl.WModel
+import org.nanosite.xwarp.model.impl.WProcessor
+import org.nanosite.xwarp.model.impl.WStep
 import org.nanosite.xwarp.simulation.WLogger
 import org.nanosite.xwarp.simulation.WSimulator
 

@@ -1,4 +1,4 @@
-package org.nanosite.xwarp.model
+package org.nanosite.xwarp.model.impl
 
 class Scaling {
 	/** Scale UI resource amounts (milliseconds) to simulator amounts (microseconds) */

@@ -1,4 +1,4 @@
-package org.nanosite.xwarp.model
+package org.nanosite.xwarp.model.impl
 
 class WProcessor extends WResource {
 	

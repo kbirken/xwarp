@@ -2,7 +2,7 @@ package org.nanosite.xwarp.model.api
 
 import java.util.List
 import java.util.Map
-import org.nanosite.xwarp.model.WResource
+import org.nanosite.xwarp.model.impl.WResource
 
 interface IStep extends IStepSuccessor {
 	def String getQualifiedName()
