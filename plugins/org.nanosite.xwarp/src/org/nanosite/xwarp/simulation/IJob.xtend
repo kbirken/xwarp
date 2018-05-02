@@ -2,6 +2,7 @@ package org.nanosite.xwarp.simulation
 
 import java.util.Map
 import org.nanosite.xwarp.model.IResource
+import org.nanosite.xwarp.result.StepInstance
 
 interface IJob {
 
@@ -16,4 +17,10 @@ interface IJob {
 	def boolean isDone()
 	
 	def void exitActions()
+	
+	
+	def void traceReady(long timestamp)
+	def void traceRunning(long timestamp)
+	def void traceDone(long timestamp)
+	def StepInstance getResult()
 }

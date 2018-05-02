@@ -1,12 +1,21 @@
 package org.nanosite.xwarp.tests
 
 import org.junit.Test
+import org.nanosite.xwarp.model.IModel
+import org.nanosite.xwarp.result.SimResult
 import org.nanosite.xwarp.simulation.WLogger
 import org.nanosite.xwarp.simulation.WSimulator
+
+import static org.junit.Assert.assertEquals
+import static org.junit.Assert.assertNotNull
 
 import static extension org.nanosite.xwarp.model.ModelBuilder.*
 
 class BasicTests {
+	/**
+	 * The timebase for warp is one microsecond, thus we define a millisec as 1000 microseconds.
+	 */
+	protected final int MS = 1000;
 
 	@Test
 	def void test01() {
@@ -31,9 +40,35 @@ class BasicTests {
 		]
 		
 		// create simulator and start simulation
-		val logger = new WLogger(9)
-		val simulator = new WSimulator(logger)
-		simulator.simulate(model)
+		val result = simulate(model, 2)
+		println("---")
+		result.dump
+		
+		result.check("Behavior1::Step1", 0, 0, 100)
+		result.check("Behavior1::Step2", 100, 100, 600)
 	}
 	
+	def private SimResult simulate(IModel model, int nStepsExpected) {
+		val logger = new WLogger(9)
+		val simulator = new WSimulator(logger)
+		val result = simulator.simulate(model)
+		assertEquals(nStepsExpected, result.stepInstances.size)
+		result
+	}
+
+	def private check(
+		SimResult result,
+		String stepName,
+		long tReadyExpected,
+		long tRunningExpected,
+		long tDoneExpected
+	) {
+		// search for part of step name only
+		val si = result.stepInstances.findFirst[step.qualifiedName.contains(stepName)]
+		assertNotNull(si)
+		
+		assertEquals(tReadyExpected*MS, si.readyTime)
+		assertEquals(tRunningExpected*MS, si.runningTime)
+		assertEquals(tDoneExpected*MS, si.doneTime)
+	}
 }

@@ -4,6 +4,7 @@ import java.util.List
 import java.util.Map
 import org.nanosite.xwarp.model.IModel
 import org.nanosite.xwarp.model.IResource
+import org.nanosite.xwarp.result.SimResult
 
 class WSimulator implements IScheduler {
 
@@ -15,18 +16,21 @@ class WSimulator implements IScheduler {
 	
 	val WSimState state
 
+	val result = new SimResult
+	
 	new(ILogger logger) {
 		this.logger = logger
 		this.state = new WSimState(logger)
 	}
 	
-	def void simulate(IModel model) {
+	def SimResult simulate(IModel model) {
 		
 		// set simulation time
 		time = 0L
 		
-		// reset SimState
+		// reset SimState and SimResult
 		state.clear
+		result.clear
 		
 		// initialize readyList
 		readyList.clear
@@ -51,7 +55,7 @@ class WSimulator implements IScheduler {
 			val ok = doIteration(model.resources/*pools, scheds, isLimited, loadfile*/);
 			if (!ok) {
 				// error message is printed inside iteration()
-				return
+				return null
 			}
 			iteration++
 		}
@@ -62,6 +66,8 @@ class WSimulator implements IScheduler {
 				'''simulation ended due to max number of iterations (max=«nMax»)'''
 			)
 		}
+		
+		result
 	}
 
 	def private boolean doIteration(List<IResource> allResources) {
@@ -84,6 +90,7 @@ class WSimulator implements IScheduler {
 	
 				if (job.hasResourceNeeds) {
 					runningList.add(job)
+					job.traceRunning(time)
 				} else {
 					// this is a job with zero resource usage, it is already done
 					jobDone(job)
@@ -327,13 +334,18 @@ class WSimulator implements IScheduler {
 	override void addJob(IJob job) {
 		log(1, ILogger.Type.READY, job.qualifiedName)
 		readyList.add(job)
+		job.traceReady(time)
 	}
 
 	def private void jobDone(IJob job) {
 		job.exitActions()
 		log(1, ILogger.Type.DONE, job.qualifiedName)
+		job.traceDone(time)
 //		drawNode(step);
 //		_doneMap[step] = _time;
+
+		// collect simulation result data from job and add it to overall simulation result 
+		result.addInstance(job.result)
 	}
 	
 	def private log(int level, ILogger.Type type, String msg) {

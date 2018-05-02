@@ -4,6 +4,7 @@ import java.util.List
 import java.util.Map
 import org.nanosite.xwarp.model.IResource
 import org.nanosite.xwarp.model.IStep
+import org.nanosite.xwarp.result.StepInstance
 
 class WActiveStep implements IJob {
 
@@ -15,10 +16,14 @@ class WActiveStep implements IJob {
 
 	Map<IResource, Long> currentResourceNeeds = newHashMap
 
+	val StepInstance result
+	
 	new(IStep step, WActiveBehavior behavior) {
 		this.step = step
 		this.behavior = behavior
 		step.copyResourceNeeds(currentResourceNeeds)
+
+		this.result = new StepInstance(step)
 	}
 	
 	def IStep getStep() {
@@ -101,5 +106,21 @@ class WActiveStep implements IJob {
 			scheduler.addJob(this)
 //		}
 //		eventAcceptor.signalReady(step, this, runNow);
-		}
+	}
+
+	override void traceReady(long timestamp) {
+		result.readyTime = timestamp
+	}
+		
+	override void traceRunning(long timestamp) {
+		result.runningTime = timestamp
+	}
+		
+	override void traceDone(long timestamp) {
+		result.doneTime = timestamp
+	}
+		
+	override StepInstance getResult() {
+		result
+	}
 }

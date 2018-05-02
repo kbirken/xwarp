@@ -10,5 +10,6 @@ Require-Bundle: com.google.guava,
  org.eclipse.xtend.lib,
  org.eclipse.xtend.lib.macro
 Export-Package: org.nanosite.xwarp.model,
+ org.nanosite.xwarp.result,
  org.nanosite.xwarp.simulation
 
