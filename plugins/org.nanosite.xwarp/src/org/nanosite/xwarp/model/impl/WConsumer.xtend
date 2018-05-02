@@ -2,8 +2,9 @@ package org.nanosite.xwarp.model.impl
 
 import com.google.common.collect.ImmutableList
 import java.util.List
+import org.nanosite.xwarp.model.IConsumer
 
-class WConsumer extends WNamedElement {
+class WConsumer extends WNamedElement implements IConsumer {
 	
 	List<WBehavior> behaviors = newArrayList
 	
@@ -17,6 +18,6 @@ class WConsumer extends WNamedElement {
 		true
 	}
 	
-	def getBehaviors() { ImmutableList.copyOf(behaviors) }
+	override getBehaviors() { ImmutableList.copyOf(behaviors) }
 	
 }
