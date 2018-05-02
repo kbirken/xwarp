@@ -56,7 +56,7 @@ class WResourceUsage {
 	}
 	
 	def asString() {
-		'''«resource.name»/«users.size»/«WIntAccuracy.toPrint(sum)»>«WIntAccuracy.toPrint(minDelta)»'''
+		'''«resource.name»/«users.size»/«WIntAccuracy.toPrint(sum)»>«WIntAccuracy.toPrint(minDelta)» '''
 	}
 	
 	def logUsedByJob(IJob job) {

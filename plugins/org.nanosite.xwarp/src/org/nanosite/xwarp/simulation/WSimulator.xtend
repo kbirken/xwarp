@@ -209,11 +209,11 @@ class WSimulator implements IScheduler {
 			if (resourceUsages.empty) 0L else resourceUsages.values.map[minDelta].min
 //		val boolean logstart = true;
 		val sb = new StringBuilder
-		for(res : resourceUsages.keySet) {
-//			val ru = resourceUsages.get(res)
-//			//val long minDelta = isLimited[r] ? (mins[r] * nRequests[r]) : mins[r];
-			sb.append(resourceUsages.get(res).asString)
-			sb.append(" ")
+		for(res : allResources) {
+			val ru = resourceUsages.get(res)
+			if (ru!==null) {
+				sb.append(ru.asString)
+			}
 		}
 		log(3, ILogger.Type.DEBUG, sb.toString)
 
