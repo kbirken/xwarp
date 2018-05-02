@@ -16,15 +16,32 @@ class WStep extends WNamedElement implements IStep {
 	
 	List<IStepSuccessor> successors = newArrayList
 
+	new(String name, long waitTime) {
+		this(name, waitTime, null)
+	}
+
 	new(String name, Map<IResource, Long> resourceNeeds) {
+		this(name, 0L, resourceNeeds)
+	}
+	
+	new(String name, long waitTime, Map<IResource, Long> resourceNeeds) {
 		super(name)
-		
+
+		// add wait request, if any
+		if (waitTime>0L) {
+			this.resourceNeeds.put(WResource.waitResource,
+				WIntAccuracy.toCalc(Scaling.resourceUItoWarp * waitTime)
+			)
+		}
+			
 		// scale needed loads and store it
-		for(rn : resourceNeeds.entrySet) {
-			val res = rn.key
-			if (res instanceof WResource) {
-				val amount = WIntAccuracy.toCalc(Scaling.resourceUItoWarp * rn.value) 
-				this.resourceNeeds.put(res, amount)
+		if (resourceNeeds!==null) {
+			for(rn : resourceNeeds.entrySet) {
+				val res = rn.key
+				if (res instanceof WResource) {
+					val amount = WIntAccuracy.toCalc(Scaling.resourceUItoWarp * rn.value) 
+					this.resourceNeeds.put(res, amount)
+				}
 			}
 		}
 	}

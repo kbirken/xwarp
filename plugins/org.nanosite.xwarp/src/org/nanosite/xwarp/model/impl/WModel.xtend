@@ -12,12 +12,9 @@ class WModel implements IModel {
 	List<WConsumer> consumers = newArrayList
 	List<WBehavior> initial = newArrayList 
 	
-	// the wait-resource is unlimited per definition
-	WResource waitResource = new WResource("wait", false)
-	
 	new() {
 		// add wait resource
-		resources.add(waitResource)
+		resources.add(WResource.waitResource)
 	}
 	
 	def boolean addResource(WResource res) {

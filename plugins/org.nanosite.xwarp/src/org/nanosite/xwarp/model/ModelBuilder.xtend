@@ -1,6 +1,5 @@
 package org.nanosite.xwarp.model
 
-import java.util.List
 import java.util.Map
 import org.nanosite.xwarp.model.impl.WBehavior
 import org.nanosite.xwarp.model.impl.WConsumer
@@ -61,8 +60,16 @@ class ModelBuilder {
 		}
 	}
 	
+	def static IStep step(String name, long waitTime) {
+		new WStep(name, waitTime)
+	}
+
 	def static IStep step(String name, Map<IResource, Long> resourceNeeds) {
 		new WStep(name, resourceNeeds)
+	}
+
+	def static IStep step(String name, long waitTime, Map<IResource, Long> resourceNeeds) {
+		new WStep(name, waitTime, resourceNeeds)
 	}
 
 }
