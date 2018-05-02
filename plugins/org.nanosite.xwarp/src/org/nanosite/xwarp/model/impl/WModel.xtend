@@ -12,7 +12,8 @@ class WModel implements IModel {
 	List<WConsumer> consumers = newArrayList
 	List<WBehavior> initial = newArrayList 
 	
-	WResource waitResource = new WResource("wait" /*, false */)
+	// the wait-resource is unlimited per definition
+	WResource waitResource = new WResource("wait", false)
 	
 	new() {
 		// add wait resource

@@ -35,19 +35,28 @@ class WResourceUsage {
 		sum
 	}
 	
-	def long getMin() {
-		min
+	def long getMinDelta() {
+		if (resource.isLimited)
+			min * users.size
+		else
+			min
 	}
 	
 	def consume(long deltaTime) {
 		// TODO: handle CST and more advanced schedulers
+		val nReq = users.size
+		val dt =
+			if (resource.isLimited)
+				WIntAccuracy.div(deltaTime, nReq)
+			else deltaTime
+
 		for(job : users) {
-			job.useResource(resource, deltaTime)
+			job.useResource(resource, dt)
 		}
 	}
 	
 	def asString() {
-		'''«resource.name»/«users.size»/«WIntAccuracy.toPrint(sum)»>«WIntAccuracy.toPrint(min)»'''
+		'''«resource.name»/«users.size»/«WIntAccuracy.toPrint(sum)»>«WIntAccuracy.toPrint(minDelta)»'''
 	}
 	
 	def logUsedByJob(IJob job) {

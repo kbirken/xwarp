@@ -40,19 +40,56 @@ class BasicTests {
 		]
 		
 		// create simulator and start simulation
-		val result = simulate(model, 2)
-		println("---")
-		result.dump
-		
+		val result = simulate(model, 2, false)
 		result.check("Behavior1::Step1", 0, 0, 100)
 		result.check("Behavior1::Step2", 100, 100, 600)
 	}
 	
-	def private SimResult simulate(IModel model, int nStepsExpected) {
-		val logger = new WLogger(9)
+	@Test
+	def void test02() {
+		// create hardware model
+		val cpu1 = processor("CPU1")
+
+		// create software model
+		val consumer1 = consumer("Component1") => [
+			add(
+				behavior("C1B1") => [
+					add(step("C1B1S1", #{ cpu1->100L }))
+				]
+			)
+		]
+		val consumer2 = consumer("Component2") => [
+			add(
+				behavior("C2B1") => [
+					add(step("C2B1S1", #{ cpu1->100L }))
+				]
+			)
+		]
+
+		// build model to be simulated
+		val model = model => [
+			add(cpu1)
+			add(consumer1)
+			add(consumer2)
+			addInitial(consumer1.behaviors.head)
+			addInitial(consumer2.behaviors.head)
+		]
+		
+		// create simulator and start simulation
+		val result = simulate(model, 2, true)
+		result.check("C1B1S1", 0, 0, 200)
+		result.check("C2B1S1", 0, 0, 200)
+	}
+	
+	def private SimResult simulate(IModel model, int nStepsExpected, boolean dumpResult) {
+		val logger = new WLogger(4)
 		val simulator = new WSimulator(logger)
 		val result = simulator.simulate(model)
 		assertEquals(nStepsExpected, result.stepInstances.size)
+		if (dumpResult) {
+			println("---")
+			result.dump
+		}
 		result
 	}
 

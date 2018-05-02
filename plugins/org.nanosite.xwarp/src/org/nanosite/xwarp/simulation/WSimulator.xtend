@@ -205,7 +205,8 @@ class WSimulator implements IScheduler {
 		}
 		resourceUsages.values.forEach[computeMin]
 	
-		val long overallMinDelta = if (resourceUsages.empty) 0L else resourceUsages.values.map[min].min
+		val long overallMinDelta =
+			if (resourceUsages.empty) 0L else resourceUsages.values.map[minDelta].min
 //		val boolean logstart = true;
 		val sb = new StringBuilder
 		for(res : resourceUsages.keySet) {
@@ -214,7 +215,7 @@ class WSimulator implements IScheduler {
 			sb.append(resourceUsages.get(res).asString)
 			sb.append(" ")
 		}
-		log(2, ILogger.Type.DEBUG, sb.toString)
+		log(3, ILogger.Type.DEBUG, sb.toString)
 
 //		// record detailed results
 		val tDelta = WIntAccuracy.toPrint(overallMinDelta)

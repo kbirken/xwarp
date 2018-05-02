@@ -9,7 +9,8 @@ class WProcessor extends WResource {
 	}
 
 	new(String name) {
-		super(name)
+		// processors are always limited resources
+		super(name, true)
 	}
 	
 }
