@@ -42,8 +42,10 @@ class BasicSequentialTests extends TestBase {
 		val consumer1 = consumer("Comp1") => [
 			add(
 				behavior("Bhvr1") => [
-					add(step("S1", #{ cpu1->2000L }))
-					add(step("S2", #{ cpu1->3000L }))
+					add(
+						step("S1", #{ cpu1->2000L }),
+						step("S2", #{ cpu1->3000L })
+					)
 				]
 			)
 		]

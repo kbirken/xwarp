@@ -30,10 +30,8 @@ class BasicParallelTests extends TestBase {
 		// build model to be simulated
 		val model = model => [
 			add(cpu1)
-			add(consumer1)
-			add(consumer2)
-			addInitial(consumer1.behaviors.head)
-			addInitial(consumer2.behaviors.head)
+			add(consumer1, consumer2)
+			addInitial(consumer1.behaviors.head, consumer2.behaviors.head)
 		]
 		
 		// create simulator and start simulation
@@ -66,10 +64,8 @@ class BasicParallelTests extends TestBase {
 		// build model to be simulated
 		val model = model => [
 			add(cpu1)
-			add(consumer1)
-			add(consumer2)
-			addInitial(consumer1.behaviors.head)
-			addInitial(consumer2.behaviors.head)
+			add(consumer1, consumer2)
+			addInitial(consumer1.behaviors.head, consumer2.behaviors.head)
 		]
 		
 		// create simulator and start simulation
@@ -103,10 +99,8 @@ class BasicParallelTests extends TestBase {
 		// build model to be simulated
 		val model = model => [
 			add(cpu1)
-			add(consumer1)
-			add(consumer2)
-			addInitial(consumer1.behaviors.head)
-			addInitial(consumer2.behaviors.head)
+			add(consumer1, consumer2)
+			addInitial(consumer1.behaviors.head, consumer2.behaviors.head)
 		]
 		
 		// create simulator and start simulation

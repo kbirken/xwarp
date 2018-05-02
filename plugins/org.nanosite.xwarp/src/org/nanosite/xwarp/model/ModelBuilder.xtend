@@ -1,5 +1,6 @@
 package org.nanosite.xwarp.model
 
+import java.util.List
 import java.util.Map
 import org.nanosite.xwarp.model.impl.WBehavior
 import org.nanosite.xwarp.model.impl.WConsumer
@@ -14,20 +15,21 @@ class ModelBuilder {
 		new WModel
 	}
 	
-	def static void add(IModel model, INamed item) {
+	def static void add(IModel model, INamed... items) {
 		if (model instanceof WModel) {
-			switch(item) {
-				WResource: model.addResource(item)
-				WConsumer: model.addConsumer(item)
-				default: throw new RuntimeException("Unknown model item '" + item.name + "'")
-			}
+			items.forEach[
+				switch(it) {
+					WResource: model.addResource(it)
+					WConsumer: model.addConsumer(it)
+					default: throw new RuntimeException("Unknown model item '" + it.name + "'")
+				}
+			]
 		}
 	}
-
-	def static void addInitial(IModel model, IBehavior behavior) {
+	
+	def static void addInitial(IModel model, IBehavior... behaviors) {
 		if (model instanceof WModel) {
-			if (behavior instanceof WBehavior)
-				model.addInitial(behavior)
+			behaviors.filter(WBehavior).forEach [ model.addInitial(it) ]
 		}
 	}
 	
@@ -39,10 +41,11 @@ class ModelBuilder {
 		new WConsumer(name)
 	}
 
-	def static void add(IConsumer consumer, IBehavior behavior) {
+	def static void add(IConsumer consumer, IBehavior behavior, IBehavior... behaviors) {
 		if (consumer instanceof WConsumer) {
 			if (behavior instanceof WBehavior)
 				consumer.addBehavior(behavior)
+			behaviors.filter(WBehavior).forEach[consumer.addBehavior(it)]
 		}
 	}
 	
@@ -50,10 +53,11 @@ class ModelBuilder {
 		new WBehavior(name)
 	}
 
-	def static void add(IBehavior behavior, IStep step) {
+	def static void add(IBehavior behavior, IStep step, IStep... steps) {
 		if (behavior instanceof WBehavior) {
 			if (step instanceof WStep)
 				behavior.addStep(step)
+			steps.filter(WStep).forEach[behavior.addStep(it)]
 		}
 	}
 	
