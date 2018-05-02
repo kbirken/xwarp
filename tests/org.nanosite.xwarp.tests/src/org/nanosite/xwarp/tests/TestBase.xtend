@@ -36,7 +36,7 @@ class TestBase {
 	) {
 		// search for part of step name only
 		val si = result.stepInstances.findFirst[step.qualifiedName.contains(stepName)]
-		assertNotNull(si)
+		assertNotNull("Cannot find step result for name '" + stepName + "'", si)
 		
 		assertEquals(tReadyExpected*MS, si.readyTime)
 		assertEquals(tRunningExpected*MS, si.runningTime)
