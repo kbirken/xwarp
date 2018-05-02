@@ -1,0 +1,14 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: xwarp resource simulator
+Bundle-SymbolicName: org.nanosite.xwarp
+Bundle-Version: 0.7.0.qualifier
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-Vendor: nanosite
+Require-Bundle: com.google.guava,
+ org.eclipse.xtext.xbase.lib,
+ org.eclipse.xtend.lib,
+ org.eclipse.xtend.lib.macro
+Export-Package: org.nanosite.xwarp.model,
+ org.nanosite.xwarp.simulation
+
