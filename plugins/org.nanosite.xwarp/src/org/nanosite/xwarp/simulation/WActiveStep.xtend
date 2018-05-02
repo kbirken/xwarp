@@ -2,7 +2,7 @@ package org.nanosite.xwarp.simulation
 
 import java.util.List
 import java.util.Map
-import org.nanosite.xwarp.model.api.IStep
+import org.nanosite.xwarp.model.IStep
 import org.nanosite.xwarp.model.impl.WResource
 
 class WActiveStep implements IJob {

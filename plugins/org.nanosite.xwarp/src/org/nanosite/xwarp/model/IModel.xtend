@@ -1,4 +1,4 @@
-package org.nanosite.xwarp.model.api
+package org.nanosite.xwarp.model
 
 import java.util.List
 

@@ -1,9 +1,9 @@
 package org.nanosite.xwarp.simulation
 
 import java.util.List
-import org.nanosite.xwarp.model.api.IBehavior
-import org.nanosite.xwarp.model.api.IStep
-import org.nanosite.xwarp.model.api.IStepSuccessor
+import org.nanosite.xwarp.model.IBehavior
+import org.nanosite.xwarp.model.IStep
+import org.nanosite.xwarp.model.IStepSuccessor
 
 class WActiveBehavior {
 

@@ -1,6 +1,6 @@
 package org.nanosite.xwarp.model.impl
 
-import org.nanosite.xwarp.model.api.INamed
+import org.nanosite.xwarp.model.INamed
 
 abstract class WNamedElement implements INamed {
 	

@@ -3,8 +3,8 @@ package org.nanosite.xwarp.model.impl
 import com.google.common.collect.ImmutableList
 import java.util.List
 import java.util.Map
-import org.nanosite.xwarp.model.api.IStep
-import org.nanosite.xwarp.model.api.IStepSuccessor
+import org.nanosite.xwarp.model.IStep
+import org.nanosite.xwarp.model.IStepSuccessor
 import org.nanosite.xwarp.simulation.WIntAccuracy
 
 class WStep extends WNamedElement implements IStep {

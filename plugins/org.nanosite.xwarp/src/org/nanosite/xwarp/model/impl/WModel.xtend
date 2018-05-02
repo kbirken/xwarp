@@ -2,9 +2,9 @@ package org.nanosite.xwarp.model.impl
 
 import com.google.common.collect.ImmutableList
 import java.util.List
-import org.nanosite.xwarp.model.api.IBehavior
-import org.nanosite.xwarp.model.api.IModel
-import org.nanosite.xwarp.model.api.IResource
+import org.nanosite.xwarp.model.IBehavior
+import org.nanosite.xwarp.model.IModel
+import org.nanosite.xwarp.model.IResource
 
 class WModel implements IModel {
 

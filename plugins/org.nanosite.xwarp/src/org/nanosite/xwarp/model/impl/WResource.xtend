@@ -1,6 +1,6 @@
 package org.nanosite.xwarp.model.impl
 
-import org.nanosite.xwarp.model.api.IResource
+import org.nanosite.xwarp.model.IResource
 
 class WResource extends WNamedElement implements IResource {
 	

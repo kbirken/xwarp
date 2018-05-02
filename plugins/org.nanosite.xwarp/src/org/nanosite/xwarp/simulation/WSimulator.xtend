@@ -2,8 +2,8 @@ package org.nanosite.xwarp.simulation
 
 import java.util.List
 import java.util.Map
-import org.nanosite.xwarp.model.api.IModel
-import org.nanosite.xwarp.model.api.IResource
+import org.nanosite.xwarp.model.IModel
+import org.nanosite.xwarp.model.IResource
 import org.nanosite.xwarp.model.impl.WResource
 
 class WSimulator implements IScheduler {
