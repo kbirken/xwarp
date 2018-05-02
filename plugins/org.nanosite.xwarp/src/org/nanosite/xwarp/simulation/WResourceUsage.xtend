@@ -1,18 +1,18 @@
 package org.nanosite.xwarp.simulation
 
 import java.util.List
-import org.nanosite.xwarp.model.impl.WResource
+import org.nanosite.xwarp.model.IResource
 
 class WResourceUsage {
 	
-	WResource resource
+	IResource resource
 	
 	long sum = 0
 	List<IJob> users = newArrayList
 	
 	long min = Long.MAX_VALUE
 	
-	new (WResource resource) {
+	new (IResource resource) {
 		this.resource = resource
 	}
 	

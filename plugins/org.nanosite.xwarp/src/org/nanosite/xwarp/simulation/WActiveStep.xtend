@@ -2,8 +2,8 @@ package org.nanosite.xwarp.simulation
 
 import java.util.List
 import java.util.Map
+import org.nanosite.xwarp.model.IResource
 import org.nanosite.xwarp.model.IStep
-import org.nanosite.xwarp.model.impl.WResource
 
 class WActiveStep implements IJob {
 
@@ -13,7 +13,7 @@ class WActiveStep implements IJob {
 	
 	val List<IStep> preconditions = newArrayList
 
-	Map<WResource, Long> currentResourceNeeds = newHashMap
+	Map<IResource, Long> currentResourceNeeds = newHashMap
 
 	new(IStep step, WActiveBehavior behavior) {
 		this.step = step
@@ -37,11 +37,11 @@ class WActiveStep implements IJob {
 		step.hasResourceNeeds
 	}
 
-	override Map<WResource, Long> getResourceNeeds() {
+	override Map<IResource, Long> getResourceNeeds() {
 		currentResourceNeeds
 	}
 	
-	override void useResource(WResource resource, long amount) {
+	override void useResource(IResource resource, long amount) {
 		val need = currentResourceNeeds.get(resource)
 		val remaining = need - amount
 		if (remaining<0) {

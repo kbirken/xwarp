@@ -4,7 +4,6 @@ import java.util.List
 import java.util.Map
 import org.nanosite.xwarp.model.IModel
 import org.nanosite.xwarp.model.IResource
-import org.nanosite.xwarp.model.impl.WResource
 
 class WSimulator implements IScheduler {
 
@@ -100,7 +99,7 @@ class WSimulator implements IScheduler {
 //		vector<vector<int> > stepsPerResource;
 //		nRequests.resize(sums.size());
 //		stepsPerResource.resize(sums.size());
-		val Map<WResource, WResourceUsage> resourceUsages = newHashMap
+		val Map<IResource, WResourceUsage> resourceUsages = newHashMap
 		for(job : runningList) {
 			for(res : job.resourceNeeds.keySet) {
 				if (! resourceUsages.containsKey(res)) {

@@ -3,6 +3,7 @@ package org.nanosite.xwarp.model.impl
 import com.google.common.collect.ImmutableList
 import java.util.List
 import java.util.Map
+import org.nanosite.xwarp.model.IResource
 import org.nanosite.xwarp.model.IStep
 import org.nanosite.xwarp.model.IStepSuccessor
 import org.nanosite.xwarp.simulation.WIntAccuracy
@@ -57,7 +58,7 @@ class WStep extends WNamedElement implements IStep {
 		!resourceNeeds.empty
 	}
 
-	override void copyResourceNeeds(Map<WResource, Long> resourceNeedsCopy) {
+	override void copyResourceNeeds(Map<IResource, Long> resourceNeedsCopy) {
 		resourceNeedsCopy.clear
 		resourceNeedsCopy.putAll(resourceNeeds)
 	}
