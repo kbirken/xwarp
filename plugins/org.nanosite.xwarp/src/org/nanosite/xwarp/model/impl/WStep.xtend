@@ -23,9 +23,8 @@ class WStep extends WNamedElement implements IStep {
 		for(rn : resourceNeeds.entrySet) {
 			val res = rn.key
 			if (res instanceof WResource) {
-				this.resourceNeeds.put(res,
-					WIntAccuracy.toCalc(Scaling.resourceUItoWarp * rn.value)
-				)
+				val amount = WIntAccuracy.toCalc(Scaling.resourceUItoWarp * rn.value) 
+				this.resourceNeeds.put(res, amount)
 			}
 		}
 	}
