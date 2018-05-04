@@ -18,6 +18,7 @@ interface IJob {
 	
 	def void exitActions()
 	
+	def void traceWaiting(long timestamp)
 	def void traceReady(long timestamp)
 	def void traceRunning(long timestamp)
 	def void traceDone(long timestamp)

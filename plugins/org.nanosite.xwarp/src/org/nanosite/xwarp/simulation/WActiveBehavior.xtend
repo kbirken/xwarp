@@ -68,12 +68,13 @@ class WActiveBehavior {
 			val job = state.getActiveStep(firstStep, this)
 			if (job.isWaiting) {
 				// this step is waiting for preconditions and will be started later
+				scheduler.createWaitingJob(job)
 //				if (! (_type==LOOP_TYPE_UNLESS && _iteration>0)) {
 //					eventAcceptor.signalSend(from, first, false);
 //				}
 			} else {
 				// immediately provide first step to scheduler
-				scheduler.addJob(job)
+				scheduler.activateJob(job)
 //				if (! (_type==LOOP_TYPE_UNLESS && _iteration>0)) {
 //					eventAcceptor.signalSend(from, first, !firstStep.waiting);
 //				}

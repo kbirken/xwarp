@@ -33,7 +33,7 @@ class TestBase {
 	def protected check(
 		SimResult result,
 		String stepName,
-		long tReadyExpected,
+		long tWaitingExpected,
 		long tRunningExpected,
 		long tDoneExpected
 	) {
@@ -41,7 +41,7 @@ class TestBase {
 		val si = result.stepInstances.findFirst[step.qualifiedName.contains(stepName)]
 		assertNotNull("Cannot find step result for name '" + stepName + "'", si)
 		
-		assertEquals(tReadyExpected*MS, si.readyTime)
+		assertEquals(tWaitingExpected*MS, si.waitingTime)
 		assertEquals(tRunningExpected*MS, si.runningTime)
 		assertEquals(tDoneExpected*MS, si.doneTime)
 	}

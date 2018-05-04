@@ -2,5 +2,6 @@ package org.nanosite.xwarp.simulation
 
 interface IScheduler {
 	
-	def void addJob(IJob job)
+	def void createWaitingJob(IJob job)
+	def void activateJob(IJob job)
 }

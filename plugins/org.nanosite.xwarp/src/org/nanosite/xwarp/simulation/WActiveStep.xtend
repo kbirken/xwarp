@@ -110,16 +110,22 @@ class WActiveStep implements IJob {
 			if (step.isFirst) {
 				// first step has to ask behavior if trigger has been received yet
 				if (behavior.isRunning) {
-					scheduler.addJob(this)
+					scheduler.activateJob(this)
 				}
 			} else {
 				// non-first steps can run immediately
-				scheduler.addJob(this)
+				scheduler.activateJob(this)
 			}
+		} else {
+			scheduler.createWaitingJob(this)
 		}
 //		eventAcceptor.signalReady(step, this, runNow);
 	}
 
+	override void traceWaiting(long timestamp) {
+		result.waitingTime = timestamp
+	}
+		
 	override void traceReady(long timestamp) {
 		result.readyTime = timestamp
 	}

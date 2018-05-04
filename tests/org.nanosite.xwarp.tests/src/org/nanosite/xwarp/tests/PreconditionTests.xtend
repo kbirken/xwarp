@@ -42,7 +42,7 @@ class PreconditionTests extends TestBase {
 		val result = simulate(model, 3, false)
 		result.check("B1S1", 0, 0, 1000)
 		result.check("B1S2", 1000, 1000, 3000)
-		result.check("B2S1", 3000, 3000, 5000)
+		result.check("B2S1", 0, 3000, 5000)
 	}
 	
 	@Test
@@ -81,10 +81,10 @@ class PreconditionTests extends TestBase {
 		]
 		
 		// create simulator and run simulation
-		val result = simulate(model, 4, true)
+		val result = simulate(model, 4, false)
 		result.check("B1S1", 0, 0, 500)
 		result.check("B1S2", 500, 500, 520)
 		result.check("B2S1", 0, 0, 20)
-		result.check("B2S2", 500, 500, 810)
+		result.check("B2S2", 20, 500, 810)
 	}
 }

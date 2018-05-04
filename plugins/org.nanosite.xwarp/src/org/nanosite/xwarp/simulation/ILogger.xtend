@@ -6,6 +6,9 @@ interface ILogger {
 		TOKEN,
 		INFO,
 		DEBUG,
+		
+		// task states
+		WAITING,
 		READY,
 		RUNNING,
 		DONE

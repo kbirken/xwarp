@@ -7,12 +7,17 @@ class StepInstance {
 	
 	val IStep step
 	
+	var long tWaiting = -1L
 	var long tReady = 0L
 	var long tRunning = 0L
 	var long tDone = 0L
 	
 	new(IStep step) {
 		this.step = step
+	}
+	
+	def setWaitingTime(long timestamp) {
+		this.tWaiting = WIntAccuracy.toPrint(timestamp)
 	}
 	
 	def setReadyTime(long timestamp) {
@@ -31,6 +36,10 @@ class StepInstance {
 		step
 	}
 
+	def getWaitingTime() {
+		if (tWaiting==-1L) tReady else tWaiting
+	}
+	
 	def getReadyTime() {
 		tReady
 	}
@@ -45,8 +54,15 @@ class StepInstance {
 	
 	def void dump() {
 		println(step.qualifiedName)
-		println('''   «String.format("%09d", tReady)» READY''')
+
+		if (tWaiting!=-1L && tWaiting!=tReady)
+			println('''   «String.format("%09d", tWaiting)» WAITING''')
+
+		if (tRunning!=tReady)
+			println('''   «String.format("%09d", tReady)» READY''')
+
 		println('''   «String.format("%09d", tRunning)» RUNNING''')
+
 		println('''   «String.format("%09d", tDone)» DONE''')
 	}
 }

@@ -332,7 +332,12 @@ class WSimulator implements IScheduler {
 		true
 	}
 
-	override void addJob(IJob job) {
+	override void createWaitingJob(IJob job) {
+		log(1, ILogger.Type.WAITING, job.qualifiedName)
+		job.traceWaiting(time)
+	}
+
+	override void activateJob(IJob job) {
 		log(1, ILogger.Type.READY, job.qualifiedName)
 		readyList.add(job)
 		job.traceReady(time)
