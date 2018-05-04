@@ -45,4 +45,9 @@ class WToken {
 			infoLocal
 		}
 	}
+	
+	override String toString() {
+		'''$«id»/«infoLocal»$'''
+	}
+
 }

@@ -65,13 +65,25 @@ class WActiveBehavior {
 //			// prepare for next incoming message
 //			closeAction(logger);
 		} else {
-			// provide first step to scheduler
 			val job = state.getActiveStep(firstStep, this)
-			scheduler.addJob(job)
-//			if (! (_type==LOOP_TYPE_UNLESS && _iteration>0)) {
-//				eventAcceptor.signalSend(from, first, !firstStep.waiting);
-//			}
+			if (job.isWaiting) {
+				// this step is waiting for preconditions and will be started later
+//				if (! (_type==LOOP_TYPE_UNLESS && _iteration>0)) {
+//					eventAcceptor.signalSend(from, first, false);
+//				}
+			} else {
+				// immediately provide first step to scheduler
+				scheduler.addJob(job)
+//				if (! (_type==LOOP_TYPE_UNLESS && _iteration>0)) {
+//					eventAcceptor.signalSend(from, first, !firstStep.waiting);
+//				}
+			}
 		}
+	}
+
+	// this will be called by the behavior's first step (if waiting for preconditions is over)
+	def boolean isRunning() {
+		currentMessage!==null
 	}
 
 	def void exitActionsForStep(WActiveStep step, List<IStepSuccessor> successors) {
@@ -79,7 +91,7 @@ class WActiveBehavior {
 		for(succ : successors) {
 			if (succ instanceof IStep) {
 				val simStep = state.getActiveStep(succ, this)
-				simStep.triggerWaiting(scheduler)
+				simStep.triggerWaiting(step, scheduler)
 			} else if (succ instanceof IBehavior) {
 				val simBehavior = state.getActiveBehavior(succ, scheduler)
 				simBehavior.done
@@ -154,12 +166,12 @@ class WActiveBehavior {
 		closeAction()
 	
 		// check if next message is already waiting
-//		if (! _queue.isEmpty()) {
-//			_current_msg = _queue.pop();
-//			log(logger, 2, _current_msg, "START");
-//			handleTrigger(_steps.back(), eventAcceptor, logger);
-//		}
-		
+		if (! queue.empty) {
+			currentMessage = queue.pop
+			log(2, currentMessage, "START")
+			val simState = state.getActiveStep(behavior.lastStep, this)
+			handleTrigger(simState)
+		}
 	}
 
 	def private void closeAction() {

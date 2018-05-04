@@ -346,7 +346,7 @@ class WSimulator implements IScheduler {
 //		_doneMap[step] = _time;
 
 		// collect simulation result data from job and add it to overall simulation result 
-		result.addInstance(job.result)
+		result.addInstance(job.clearResult)
 	}
 	
 	def private log(int level, ILogger.Type type, String msg) {

@@ -12,6 +12,8 @@ class WModel implements IModel {
 	List<WConsumer> consumers = newArrayList
 	List<WBehavior> initial = newArrayList 
 	
+	var initialized = false
+	
 	new() {
 		// add wait resource
 		resources.add(WResource.waitResource)
@@ -32,11 +34,20 @@ class WModel implements IModel {
 		true
 	}
 
+	def void finishInitialisation() {
+		consumers.forEach[finishInitialisation]
+		initialized = true
+	}
+
 	override List<IResource> getResources() {
+		if (! initialized)
+			finishInitialisation
 		ImmutableList.copyOf(resources)
 	}
 
 	override List<IBehavior> getInitial() {
+		if (! initialized)
+			finishInitialisation
 		ImmutableList.copyOf(initial)
 	}
 	

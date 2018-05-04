@@ -75,15 +75,30 @@ class ModelBuilder {
 	}
 	
 	def IStep step(String name, long waitTime) {
-		new WStep(name, waitTime)
+		val step = new WStep(name, waitTime)
+		justCreated(step)
+		step
 	}
 
 	def IStep step(String name, Map<IResource, Long> resourceNeeds) {
-		new WStep(name, resourceNeeds)
+		val step = new WStep(name, resourceNeeds)
+		justCreated(step)
+		step
 	}
 
 	def IStep step(String name, long waitTime, Map<IResource, Long> resourceNeeds) {
-		new WStep(name, waitTime, resourceNeeds)
+		val step = new WStep(name, waitTime, resourceNeeds)
+		justCreated(step)
+		step
 	}
 
+	def protected void justCreated(IStep step) { }
+
+	def void precondition(IStep step, IStep predecessor) {
+		if (step instanceof WStep) {
+			if (predecessor instanceof WStep) {
+				predecessor.addSuccessor(step)
+			}
+		}
+	}
 }

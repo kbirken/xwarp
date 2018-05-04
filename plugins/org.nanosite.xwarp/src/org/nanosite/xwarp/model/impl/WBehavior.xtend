@@ -23,8 +23,15 @@ class WBehavior extends WNamedElement implements IBehavior {
 		this.owner = owner
 	}
 
+	def void finishInitialisation() {
+		steps.forEach[finishInitialisation]
+	}
+	
 	override String getQualifiedName() {
-		'''«owner.name»::«name»'''
+		if (owner!==null)
+			'''«owner.name»::«name»'''
+		else 
+			'''??::«name»'''
 	}
 	
 	override boolean shouldAddToken() {
@@ -49,6 +56,13 @@ class WBehavior extends WNamedElement implements IBehavior {
 			null
 		else
 			steps.head
+	}
+
+	override IStep getLastStep() {
+		if (steps.empty)
+			null
+		else
+			steps.last
 	}
 
 	override boolean isLastStep(IStep step) {

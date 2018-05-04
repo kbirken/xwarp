@@ -18,6 +18,10 @@ class WConsumer extends WNamedElement implements IConsumer {
 		true
 	}
 	
+	def void finishInitialisation() {
+		behaviors.forEach[finishInitialisation]
+	}
+	
 	override getBehaviors() { ImmutableList.copyOf(behaviors) }
 	
 }

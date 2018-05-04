@@ -15,6 +15,7 @@ class WStep extends WNamedElement implements IStep {
 	WBehavior owner = null 
 	
 	List<IStepSuccessor> successors = newArrayList
+	List<IStep> predecessors = newArrayList
 
 	new(String name, long waitTime) {
 		this(name, waitTime, null)
@@ -45,24 +46,23 @@ class WStep extends WNamedElement implements IStep {
 			}
 		}
 	}
-
+	
 	def addSuccessor(IStepSuccessor successor) {
 		successors.add(successor)
-		
-		if(successor instanceof WStep) {
-//			if (_bhvr == step->_bhvr) {
-//				// remember as direct predecessor in behavior
-//				// will be added to _waitFor during prepareExecution()
-//				step->_directPredecessor = this;
-//			} else {
-//				// this is a precondition or some other condition
-//				step->waitFor(this);
-//			}
-		}
 	}
 
+	def finishInitialisation() {
+		for(successor : successors.filter(WStep)) {
+			successor.predecessors.add(this)
+		}
+	}
+	
 	override List<IStepSuccessor> getSuccessors() {
 		ImmutableList.copyOf(successors)
+	}
+
+	override List<IStep> getPredecessors() {
+		ImmutableList.copyOf(predecessors)
 	}
 	
 	def setOwner(WBehavior owner) {
@@ -73,6 +73,10 @@ class WStep extends WNamedElement implements IStep {
 		'''«owner.qualifiedName»::«name»'''
 	}
 	
+	override boolean isFirst() {
+		owner.firstStep == this
+	}
+
 	override boolean hasResourceNeeds() {
 		!resourceNeeds.empty
 	}
@@ -80,6 +84,13 @@ class WStep extends WNamedElement implements IStep {
 	override void copyResourceNeeds(Map<IResource, Long> resourceNeedsCopy) {
 		resourceNeedsCopy.clear
 		resourceNeedsCopy.putAll(resourceNeeds)
+	}
+	
+	override boolean hasSameBehavior(IStep other) {
+		if (other instanceof WStep)
+			this.owner == other.owner
+		else
+			false
 	}
 	
 	override String toString() {

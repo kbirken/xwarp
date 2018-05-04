@@ -12,18 +12,35 @@ class WActiveStep implements IJob {
 	
 	val WActiveBehavior behavior
 	
-	val List<IStep> preconditions = newArrayList
+	val List<IStep> waitingFor = newArrayList
 
 	Map<IResource, Long> currentResourceNeeds = newHashMap
 
-	val StepInstance result
+	var StepInstance result
 	
 	new(IStep step, WActiveBehavior behavior) {
 		this.step = step
 		this.behavior = behavior
-		step.copyResourceNeeds(currentResourceNeeds)
+		init(true)
 
 		this.result = new StepInstance(step)
+	}
+	
+	def private init(boolean firstTime) {
+		waitingFor.clear
+		for(predecessor : step.predecessors) {
+			if (step.hasSameBehavior(predecessor)) {
+				// the other step can only be the previous step in same behavior
+				waitingFor.add(predecessor)
+			} else {
+				// this is a precondition or some other condition
+				// due to the semantics of preconditions we only wait once for each of them
+				if (firstTime)
+					waitingFor.add(predecessor)
+			}
+		}
+
+		step.copyResourceNeeds(currentResourceNeeds)
 	}
 	
 	def IStep getStep() {
@@ -35,7 +52,7 @@ class WActiveStep implements IJob {
 	}
 
 	override boolean isWaiting() {
-		! preconditions.empty
+		! waitingFor.empty
 	}
 
 	override boolean hasResourceNeeds() {
@@ -69,42 +86,37 @@ class WActiveStep implements IJob {
 
 	override void exitActions() {
 		behavior.exitActionsForStep(this, step.successors)
+		
+		// prepare next execution
+		init(false)
 	}
 
-	def void triggerWaiting(IScheduler scheduler) {
+	def void triggerWaiting(WActiveStep from, IScheduler scheduler) {
 		//printf("CStep::done %s: %s is done - waitfor=%d\n", getQualifiedName().c_str(), step->getQualifiedName().c_str(), _waitFor.size());
 	
-//		Vector::iterator iter = find(_waitFor.begin(), _waitFor.end(), step);
-//		if (iter==_waitFor.end()) {
-//			// todo: error handling
-//			printf("ERROR in step '%s' at CStep::done('%s'): inconsistent data model\n",
-//						getQualifiedName().c_str(),
-//						step->getQualifiedName().c_str());
-//	//		throw 99;
-//	//		exit(1);
-//		}
-//		else {
-//			// we are no more waiting for this step, because it is done
-//			_waitFor.erase(iter);
-//		}
-	
-//		bool runNow = false;
-//		if (_waitFor.size()==0) {
-//			// waiting is over
-//			if (_isFirst) {
-//				// first step has to ask behavior if trigger has been received yet
-//				if (_bhvr.isRunning()) {
-//					runNow = true;
-//				}
-//			} else {
-//				// non-first steps can run immediately
-//				runNow = true;
-//			}
-//		}
-//		if (runNow) {
-//			eventAcceptor.setReady(this);
-			scheduler.addJob(this)
-//		}
+		if (waitingFor.empty) {
+			throw new RuntimeException(
+				"Internal error: Missing predecessor '" + from.qualifiedName + "' " +
+				"for step '" + qualifiedName + "'"
+			)
+		}
+
+		// we are no more waiting for the notifying step (because it is done)
+		waitingFor.remove(from.step)
+
+		if (waitingFor.empty) {
+			// waiting is over
+			
+			if (step.isFirst) {
+				// first step has to ask behavior if trigger has been received yet
+				if (behavior.isRunning) {
+					scheduler.addJob(this)
+				}
+			} else {
+				// non-first steps can run immediately
+				scheduler.addJob(this)
+			}
+		}
 //		eventAcceptor.signalReady(step, this, runNow);
 	}
 
@@ -120,8 +132,10 @@ class WActiveStep implements IJob {
 		result.doneTime = timestamp
 	}
 		
-	override StepInstance getResult() {
-		result
+	override StepInstance clearResult() {
+		val previous = result
+		result = new StepInstance(step)
+		previous
 	}
 
 	override String toString() {
