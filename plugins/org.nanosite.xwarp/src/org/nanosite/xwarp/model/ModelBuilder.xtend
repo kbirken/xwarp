@@ -49,14 +49,28 @@ class ModelBuilder {
 	}
 	
 	def IBehavior behavior(String name) {
-		new WBehavior(name)
+		behavior(name, false)
 	}
 
+	def IBehavior behavior(String name, boolean shouldAddTokens) {
+		val behavior = new WBehavior(name, shouldAddTokens)
+		justCreated(behavior)
+		behavior
+	}
+
+	def protected void justCreated(IBehavior behavior) { }
+	
 	def void add(IBehavior behavior, IStep step, IStep... steps) {
 		if (behavior instanceof WBehavior) {
 			if (step instanceof WStep)
 				behavior.addStep(step)
 			steps.filter(WStep).forEach[behavior.addStep(it)]
+		}
+	}
+	
+	def void send(IBehavior behavior, IBehavior triggered) {
+		if (behavior instanceof WBehavior) {
+			behavior.addSendTrigger(triggered)
 		}
 	}
 	

@@ -11,12 +11,17 @@ class WActiveBehavior {
 	val ISimState state 
 	val IScheduler scheduler
 	val ILogger logger
-		
+	
 	val WMessageQueue queue = new WMessageQueue
 	var WMessage currentMessage = null
 	var iteration = 0
 	
-	new(IBehavior behavior, ISimState state, IScheduler scheduler, ILogger logger) {
+	new(
+		IBehavior behavior,
+		ISimState state,
+		IScheduler scheduler,
+		ILogger logger
+	) {
 		this.behavior = behavior
 		this.state = state
 		this.scheduler = scheduler
@@ -27,7 +32,7 @@ class WActiveBehavior {
 		behavior.qualifiedName
 	}
 	
-	def void receiveTrigger(WMessage msg) {
+	def void receiveTrigger(WActiveStep from, WMessage msg) {
 		log(2, msg, "RECV ")
 		
 		if (currentMessage!==null) {
@@ -38,11 +43,11 @@ class WActiveBehavior {
 			iteration = 0
 			currentMessage = msg
 			log(2, currentMessage, "START")
-			handleTrigger()
+			handleTrigger(from)
 		}
 	}
 	
-	def void handleTrigger() {
+	def void handleTrigger(WActiveStep from) {
 		val firstStep = behavior.firstStep
 		if (firstStep===null) {
 			// there are no steps in this behavior, recursively call send triggers
@@ -83,7 +88,7 @@ class WActiveBehavior {
 		
 		// if this is the last step in one behavior, also tell behavior that we are ready
 		if (behavior.isLastStep(step.step)) {
-			lastStepDone()
+			lastStepDone(step)
 		}
 	}
 
@@ -95,11 +100,11 @@ class WActiveBehavior {
 //		_current_unless_condition = true;
 	}
 
-	def private void lastStepDone() {
+	def private void lastStepDone(WActiveStep from) {
 //		_finished_once = true;
 	
 		// last step is done, send triggers
-//		sendTriggers(from, eventAcceptor, logger);
+		sendTriggers(from)
 	
 		// prepare steps for next iteration or trigger
 //		prepareExecution();
@@ -161,6 +166,34 @@ class WActiveBehavior {
 		log(2, currentMessage, "READY")
 		currentMessage = null
 	}
+
+	def void sendTriggers(WActiveStep from) {
+		// send triggers to successor behaviors
+		val token = currentMessage.token
+		for(triggered : behavior.sendTriggers) {
+			val msg = new WMessage(
+				if (behavior.shouldAddToken) {
+					// this behavior generates its own tokens
+					genToken(token, triggered)
+				} else
+					token
+			)
+
+			val simBehavior = state.getActiveBehavior(triggered, scheduler)
+			simBehavior.receiveTrigger(from, msg)
+		}
+	}
+
+	def WToken genToken(WToken parent, IBehavior next) {
+		val info = next.qualifiedName
+		//if (_type!=LOOP_TYPE_ONCE) {
+		//sprintf(buf, "%d", _iteration);
+		//info += "%" + string(buf);
+		//}
+
+		WToken.create(info, parent, logger)
+	}
+
 	
 	def private void log(int level, WMessage msg, String action) {
 		logger.log(

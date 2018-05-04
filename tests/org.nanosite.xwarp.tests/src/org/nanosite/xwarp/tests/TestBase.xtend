@@ -1,7 +1,7 @@
 package org.nanosite.xwarp.tests
 
 import org.nanosite.xwarp.model.IModel
-import org.nanosite.xwarp.model.ModelBuilder
+import org.nanosite.xwarp.model.TestModelBuilder
 import org.nanosite.xwarp.result.SimResult
 import org.nanosite.xwarp.simulation.WLogger
 import org.nanosite.xwarp.simulation.WSimulator
@@ -11,7 +11,7 @@ import static org.junit.Assert.assertNotNull
 
 class TestBase {
 
-	protected extension ModelBuilder = new ModelBuilder
+	protected extension TestModelBuilder = new TestModelBuilder
 	
 	/**
 	 * The timebase for warp is one microsecond, thus we define a millisec as 1000 microseconds.
