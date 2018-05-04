@@ -202,4 +202,8 @@ class WActiveBehavior {
 			'''«msg.name» «action» at «qualifiedName»'''
 		)
 	}
+
+	override String toString() {
+		'''WActiveBehavior(«behavior.toString»)'''
+	}
 }

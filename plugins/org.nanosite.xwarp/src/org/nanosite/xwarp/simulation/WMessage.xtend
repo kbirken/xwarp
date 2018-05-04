@@ -14,4 +14,9 @@ class WMessage {
 	def getName() {
 		token.name
 	}
+
+	override String toString() {
+		'''WMessage(«token.toString»)'''
+	}
+
 }

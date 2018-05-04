@@ -81,4 +81,8 @@ class WStep extends WNamedElement implements IStep {
 		resourceNeedsCopy.clear
 		resourceNeedsCopy.putAll(resourceNeeds)
 	}
+	
+	override String toString() {
+		'''WStep(«if (owner!==null) qualifiedName else name»)'''
+	}
 }

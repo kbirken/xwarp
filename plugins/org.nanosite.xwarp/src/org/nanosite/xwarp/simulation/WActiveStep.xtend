@@ -123,4 +123,9 @@ class WActiveStep implements IJob {
 	override StepInstance getResult() {
 		result
 	}
+
+	override String toString() {
+		'''WActiveStep(«step.toString»)'''
+	}
+
 }

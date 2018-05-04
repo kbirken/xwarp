@@ -58,4 +58,8 @@ class WBehavior extends WNamedElement implements IBehavior {
 	override List<IBehavior> getSendTriggers() {
 		ImmutableList.copyOf(sendTriggers)
 	}
+
+	override String toString() {
+		'''WBehavior(«if (owner!==null) qualifiedName else name»)'''
+	}
 }
