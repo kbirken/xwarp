@@ -1,6 +1,8 @@
 package org.nanosite.xwarp.model
 
+import java.util.List
 import java.util.Map
+import org.nanosite.xwarp.model.impl.WBandwidthResource
 import org.nanosite.xwarp.model.impl.WBehavior
 import org.nanosite.xwarp.model.impl.WConsumer
 import org.nanosite.xwarp.model.impl.WModel
@@ -34,6 +36,10 @@ class ModelBuilder {
 	
 	def IResource processor(String name) {
 		new WProcessor(name)
+	}
+	
+	def IBandwidthResource resource(String name, List<Long> cst) {
+		new WBandwidthResource(name, cst)
 	}
 	
 	def IConsumer consumer(String name) {
