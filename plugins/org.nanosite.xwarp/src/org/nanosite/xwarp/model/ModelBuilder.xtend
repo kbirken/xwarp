@@ -10,11 +10,11 @@ import org.nanosite.xwarp.model.impl.WStep
 
 class ModelBuilder {
 	
-	def static IModel model() {
+	def IModel model() {
 		new WModel
 	}
 	
-	def static void add(IModel model, INamed... items) {
+	def void add(IModel model, INamed... items) {
 		if (model instanceof WModel) {
 			items.forEach[
 				switch(it) {
@@ -26,21 +26,21 @@ class ModelBuilder {
 		}
 	}
 	
-	def static void addInitial(IModel model, IBehavior... behaviors) {
+	def void addInitial(IModel model, IBehavior... behaviors) {
 		if (model instanceof WModel) {
 			behaviors.filter(WBehavior).forEach [ model.addInitial(it) ]
 		}
 	}
 	
-	def static IResource processor(String name) {
+	def IResource processor(String name) {
 		new WProcessor(name)
 	}
 	
-	def static IConsumer consumer(String name) {
+	def IConsumer consumer(String name) {
 		new WConsumer(name)
 	}
 
-	def static void add(IConsumer consumer, IBehavior behavior, IBehavior... behaviors) {
+	def void add(IConsumer consumer, IBehavior behavior, IBehavior... behaviors) {
 		if (consumer instanceof WConsumer) {
 			if (behavior instanceof WBehavior)
 				consumer.addBehavior(behavior)
@@ -48,11 +48,11 @@ class ModelBuilder {
 		}
 	}
 	
-	def static IBehavior behavior(String name) {
+	def IBehavior behavior(String name) {
 		new WBehavior(name)
 	}
 
-	def static void add(IBehavior behavior, IStep step, IStep... steps) {
+	def void add(IBehavior behavior, IStep step, IStep... steps) {
 		if (behavior instanceof WBehavior) {
 			if (step instanceof WStep)
 				behavior.addStep(step)
@@ -60,15 +60,15 @@ class ModelBuilder {
 		}
 	}
 	
-	def static IStep step(String name, long waitTime) {
+	def IStep step(String name, long waitTime) {
 		new WStep(name, waitTime)
 	}
 
-	def static IStep step(String name, Map<IResource, Long> resourceNeeds) {
+	def IStep step(String name, Map<IResource, Long> resourceNeeds) {
 		new WStep(name, resourceNeeds)
 	}
 
-	def static IStep step(String name, long waitTime, Map<IResource, Long> resourceNeeds) {
+	def IStep step(String name, long waitTime, Map<IResource, Long> resourceNeeds) {
 		new WStep(name, waitTime, resourceNeeds)
 	}
 

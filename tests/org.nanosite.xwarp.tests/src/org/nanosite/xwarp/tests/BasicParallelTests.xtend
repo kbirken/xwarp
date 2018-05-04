@@ -2,8 +2,6 @@ package org.nanosite.xwarp.tests
 
 import org.junit.Test
 
-import static extension org.nanosite.xwarp.model.ModelBuilder.*
-
 class BasicParallelTests extends TestBase {
 
 	@Test
