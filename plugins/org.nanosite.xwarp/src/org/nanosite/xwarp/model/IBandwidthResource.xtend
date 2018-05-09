@@ -4,6 +4,6 @@ import java.util.List
 
 interface IBandwidthResource extends IResource {
 
-	def List<Long> getCSTs()
+	def List<Integer> getCSTs()
 		
 }

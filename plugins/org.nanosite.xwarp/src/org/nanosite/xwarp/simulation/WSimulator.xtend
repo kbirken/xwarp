@@ -296,7 +296,7 @@ class WSimulator implements IScheduler {
 			return false
 		}
 
-		resourceUsages.values.forEach[consume(overallMinDelta)]
+		resourceUsages.values.forEach[consume(overallMinDelta, logger)]
 //		vector<int> nMaxRequests(nRequests.begin(), nRequests.end());
 //		{
 //			for (CStep::Vector::iterator it = _running.begin(); it!=_running.end();) {

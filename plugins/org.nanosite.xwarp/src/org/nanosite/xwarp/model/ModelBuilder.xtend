@@ -38,7 +38,7 @@ class ModelBuilder {
 		new WProcessor(name)
 	}
 	
-	def IBandwidthResource resource(String name, List<Long> cst) {
+	def IBandwidthResource resource(String name, List<Integer> cst) {
 		new WBandwidthResource(name, cst)
 	}
 	

@@ -4,7 +4,7 @@ import org.junit.Test
 
 class BasicResourceTests extends TestBase {
 
-	val static PERCENT = 10L
+	val static PERCENT = 10
 	
 	@Test
 	def void testResourceOneUserNoCPU() {
