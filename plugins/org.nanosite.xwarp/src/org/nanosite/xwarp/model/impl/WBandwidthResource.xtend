@@ -3,20 +3,22 @@ package org.nanosite.xwarp.model.impl
 import java.util.List
 import com.google.common.collect.ImmutableList
 import org.nanosite.xwarp.model.IBandwidthResource
+import org.nanosite.xwarp.model.IBandwidthResourceInterface
 
-class WBandwidthResource extends WResource implements IBandwidthResource {
+class WBandwidthResource extends WNamedElement implements IBandwidthResource {
 	
-	// for each ResourceInterface, there is one entry in the cst vector (for non-CPUs only)
-	List<Integer> contextSwitchingTimes
+	List<WBandwidthResourceInterface> interfaces
 	
 	new(String name, List<Integer> contextSwitchingTimes) {
-		// this kind of resource is always limited by bandwidth 
-		super(name, true)
+		super(name)
 		
-		this.contextSwitchingTimes = contextSwitchingTimes
+		this.interfaces = newArrayList
+		interfaces.addAll(
+			contextSwitchingTimes.map[new WBandwidthResourceInterface(this, it)]
+		)
 	}
 	
-	override List<Integer> getCSTs() {
-		ImmutableList.copyOf(contextSwitchingTimes)
+	override List<IBandwidthResourceInterface> getInterfaces() {
+		ImmutableList.copyOf(interfaces)
 	}
 }

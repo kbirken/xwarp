@@ -1,6 +1,7 @@
 package org.nanosite.xwarp.simulation
 
 import java.util.Map
+import org.nanosite.xwarp.model.IConsumableAmount
 import org.nanosite.xwarp.model.IResource
 import org.nanosite.xwarp.result.StepInstance
 
@@ -10,7 +11,8 @@ interface IJob {
 	def boolean isWaiting()
 
 	def boolean hasResourceNeeds()
-	def Map<IResource, Long> getResourceNeeds()
+	def Map<IResource, IConsumableAmount> getResourceNeeds()
+	def long getResourceNeed(IResource resource)
 	
 	def void useResource(IResource resource, long amount)
 	

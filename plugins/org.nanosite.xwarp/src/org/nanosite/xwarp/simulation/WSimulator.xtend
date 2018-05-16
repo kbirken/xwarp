@@ -113,7 +113,7 @@ class WSimulator implements IScheduler {
 					resourceUsages.put(res, new WResourceUsage(res))
 				}
 				val amount = job.resourceNeeds.get(res)
-				resourceUsages.get(res).request(amount, job)
+				resourceUsages.get(res).request(amount.amount, job)
 			}
 //			for(unsigned i=0; i<sums.size(); i++) {
 //				CStep* step = *it;

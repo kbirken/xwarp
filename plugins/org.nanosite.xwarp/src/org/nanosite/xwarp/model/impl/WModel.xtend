@@ -9,6 +9,7 @@ import org.nanosite.xwarp.model.IResource
 class WModel implements IModel {
 
 	List<WResource> resources = newArrayList
+	List<WBandwidthResource> bandwidthResources = newArrayList
 	List<WConsumer> consumers = newArrayList
 	List<WBehavior> initial = newArrayList 
 	
@@ -21,6 +22,11 @@ class WModel implements IModel {
 	
 	def boolean addResource(WResource res) {
 		resources.add(res)
+		true
+	}
+	
+	def boolean addBandwidthResource(WBandwidthResource res) {
+		bandwidthResources.add(res)
 		true
 	}
 	

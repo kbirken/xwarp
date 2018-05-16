@@ -3,10 +3,13 @@ package org.nanosite.xwarp.simulation
 import java.util.List
 import org.nanosite.xwarp.model.IBandwidthResource
 import org.nanosite.xwarp.model.IResource
+import org.nanosite.xwarp.model.IBandwidthResourceInterface
 
 class WResourceUsage {
 	
-	IResource resource
+	val IResource resource
+	
+	val int contextSwitchingPenalty
 	
 	long sum = 0
 	List<IJob> users = newArrayList
@@ -15,6 +18,11 @@ class WResourceUsage {
 	
 	new (IResource resource) {
 		this.resource = resource
+		this.contextSwitchingPenalty =
+			if (resource instanceof IBandwidthResourceInterface)
+				resource.CST
+			else
+				0
 	}
 	
 	def request(long amount, IJob by) {
@@ -26,17 +34,13 @@ class WResourceUsage {
 		// TODO: also handle more advanced schedulers
 		val sharing = users.size > 1
 		for(job : users) {
-			var req = job.resourceNeeds.get(resource)
-			if (resource instanceof IBandwidthResource) {
-				// TODO: use index corresp. to interface
-				val cst = resource.CSTs.get(0)
-				if (cst>0 && sharing) {
-					val penalty = req * cst 
-					req = req + WIntAccuracy.div(penalty, 1000L)
-				}
+			var amount = job.getResourceNeed(resource)
+			if (contextSwitchingPenalty>0 && sharing) {
+				val penalty = amount * contextSwitchingPenalty 
+				amount += WIntAccuracy.div(penalty, 1000L)
 			}
-			if (req>0 && req < min) {
-				min = req
+			if (amount>0 && amount<min) {
+				min = amount
 			}
 		}
 	}
@@ -62,15 +66,11 @@ class WResourceUsage {
 			else deltaTime
 
 		var dtNetto = dt
-		if (resource instanceof IBandwidthResource) {
-			val cstPer1000 = resource.CSTs.get(0)
-			if (cstPer1000>0 && sharing) {
-				// we implicitly rounded the last digit of dtNetto, add 5 to compensate this
-				dtNetto = WIntAccuracy.div(dt*1000, 1000+cstPer1000)
-				if (dtNetto<10) {
-					dtNetto = dtNetto + 5
-				}
-				
+		if (contextSwitchingPenalty>0 && sharing) {
+			// we implicitly rounded the last digit of dtNetto, add 5 to compensate this
+			dtNetto = WIntAccuracy.div(dt*1000, 1000+contextSwitchingPenalty)
+			if (dtNetto<10) {
+				dtNetto = dtNetto + 5
 			}
 //			logger.log(3, ILogger.Type.DEBUG, "%s: cst penalty, res %d: dt=%5d dtNetto=%5d cts=%5d\n",
 //						getQualifiedName().c_str(),
@@ -91,8 +91,8 @@ class WResourceUsage {
 	
 	def logUsedByJob(IJob job) {
 		val sumScaled = WIntAccuracy.toPrint(sum)
-		val byJob = job.resourceNeeds.get(resource)
-		if (byJob===null)
+		val byJob = job.getResourceNeed(resource)
+		if (byJob>0)
 			format(sumScaled, 0L)
 		else
 			format(sumScaled, WIntAccuracy.toPrint(byJob))

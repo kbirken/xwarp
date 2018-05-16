@@ -2,6 +2,8 @@ package org.nanosite.xwarp.simulation
 
 import java.util.List
 import java.util.Map
+import org.nanosite.xwarp.model.IAmount
+import org.nanosite.xwarp.model.IConsumableAmount
 import org.nanosite.xwarp.model.IResource
 import org.nanosite.xwarp.model.IStep
 import org.nanosite.xwarp.result.StepInstance
@@ -14,7 +16,7 @@ class WActiveStep implements IJob {
 	
 	val List<IStep> waitingFor = newArrayList
 
-	Map<IResource, Long> currentResourceNeeds = newHashMap
+	Map<IResource, IConsumableAmount> currentResourceNeeds = newHashMap
 
 	var StepInstance result
 	
@@ -59,13 +61,20 @@ class WActiveStep implements IJob {
 		step.hasResourceNeeds
 	}
 
-	override Map<IResource, Long> getResourceNeeds() {
+	override Map<IResource, IConsumableAmount> getResourceNeeds() {
 		currentResourceNeeds
+	}
+
+	override long getResourceNeed(IResource resource) {
+		val need = currentResourceNeeds.get(resource)
+		if (need===null)
+			0L
+		else
+			need.amount
 	}
 	
 	override void useResource(IResource resource, long amount) {
-		val need = currentResourceNeeds.get(resource)
-		val remaining = need - amount
+		val remaining = currentResourceNeeds.get(resource).reduceAmount(amount)
 		if (remaining<0) {
 			throw new RuntimeException(
 				"Internal error: negative resource need for " +
@@ -74,8 +83,6 @@ class WActiveStep implements IJob {
 		}
 		if (remaining == 0) {
 			currentResourceNeeds.remove(resource)
-		} else {
-			currentResourceNeeds.put(resource, remaining)
 		}
 	}
 
@@ -147,5 +154,5 @@ class WActiveStep implements IJob {
 	override String toString() {
 		'''WActiveStep(«step.toString»)'''
 	}
-
+	
 }

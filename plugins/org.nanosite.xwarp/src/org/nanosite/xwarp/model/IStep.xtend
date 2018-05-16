@@ -12,7 +12,7 @@ interface IStep extends IStepSuccessor, INamed {
 	def List<IStep> getPredecessors()
 	
 	def boolean hasResourceNeeds()
-	def void copyResourceNeeds(Map<IResource, Long> resourceNeedsCopy)
+	def void copyResourceNeeds(Map<IResource, IConsumableAmount> resourceNeedsCopy)
 
 	def boolean hasSameBehavior(IStep other)	
 }

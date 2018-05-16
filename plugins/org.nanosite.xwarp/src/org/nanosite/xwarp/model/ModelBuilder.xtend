@@ -21,6 +21,7 @@ class ModelBuilder {
 			items.forEach[
 				switch(it) {
 					WResource: model.addResource(it)
+					WBandwidthResource: model.addBandwidthResource(it)
 					WConsumer: model.addConsumer(it)
 					default: throw new RuntimeException("Unknown model item '" + it.name + "'")
 				}
@@ -34,7 +35,7 @@ class ModelBuilder {
 		}
 	}
 	
-	def IResource processor(String name) {
+	def IProcessor processor(String name) {
 		new WProcessor(name)
 	}
 	
@@ -84,6 +85,10 @@ class ModelBuilder {
 		val step = new WStep(name, waitTime)
 		justCreated(step)
 		step
+	}
+
+	def IBandwidthResourceInterface ri(IBandwidthResource res, int interfaceIndex) {
+		res.interfaces.get(interfaceIndex)
 	}
 
 	def IStep step(String name, Map<IResource, Long> resourceNeeds) {

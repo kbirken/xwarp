@@ -3,14 +3,14 @@ package org.nanosite.xwarp.model.impl
 import com.google.common.collect.ImmutableList
 import java.util.List
 import java.util.Map
+import org.nanosite.xwarp.model.IConsumableAmount
 import org.nanosite.xwarp.model.IResource
 import org.nanosite.xwarp.model.IStep
 import org.nanosite.xwarp.model.IStepSuccessor
-import org.nanosite.xwarp.simulation.WIntAccuracy
 
 class WStep extends WNamedElement implements IStep {
 	
-	val Map<WResource, Long> resourceNeeds = newHashMap
+	val Map<IResource, WAmount> resourceNeeds = newHashMap
 
 	WBehavior owner = null 
 	
@@ -30,19 +30,13 @@ class WStep extends WNamedElement implements IStep {
 
 		// add wait request, if any
 		if (waitTime>0L) {
-			this.resourceNeeds.put(WResource.waitResource,
-				WIntAccuracy.toCalc(Scaling.resourceUItoWarp * waitTime)
-			)
+			this.resourceNeeds.put(WResource.waitResource, new WAmount(waitTime))
 		}
 			
 		// scale needed loads and store it
 		if (resourceNeeds!==null) {
 			for(rn : resourceNeeds.entrySet) {
-				val res = rn.key
-				if (res instanceof WResource) {
-					val amount = WIntAccuracy.toCalc(Scaling.resourceUItoWarp * rn.value) 
-					this.resourceNeeds.put(res, amount)
-				}
+				this.resourceNeeds.put(rn.key, new WAmount(rn.value))
 			}
 		}
 	}
@@ -81,7 +75,7 @@ class WStep extends WNamedElement implements IStep {
 		!resourceNeeds.empty
 	}
 
-	override void copyResourceNeeds(Map<IResource, Long> resourceNeedsCopy) {
+	override void copyResourceNeeds(Map<IResource, IConsumableAmount> resourceNeedsCopy) {
 		resourceNeedsCopy.clear
 		resourceNeedsCopy.putAll(resourceNeeds)
 	}

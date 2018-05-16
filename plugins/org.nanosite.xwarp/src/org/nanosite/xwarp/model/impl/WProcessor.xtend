@@ -1,6 +1,8 @@
 package org.nanosite.xwarp.model.impl
 
-class WProcessor extends WResource {
+import org.nanosite.xwarp.model.IProcessor
+
+class WProcessor extends WResource implements IProcessor {
 	
 	enum Scheduling {
 		SCHED_PLAIN,
