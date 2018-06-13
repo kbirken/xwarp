@@ -45,8 +45,13 @@ class ModelBuilder {
 		new WBandwidthResource(name, cst)
 	}
 	
-	def IPool pool(String name, long maxAmount) {
-		new WPool(name, maxAmount)
+	def IPool pool(
+		String name,
+		long maxAmount,
+		IPool.ErrorAction onOverflow,
+		IPool.ErrorAction onUnderflow
+	) {
+		new WPool(name, maxAmount, onOverflow, onUnderflow)
 	}
 	
 	def IConsumer consumer(String name) {
