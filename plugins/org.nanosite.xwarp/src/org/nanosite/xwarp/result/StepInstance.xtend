@@ -1,5 +1,7 @@
 package org.nanosite.xwarp.result
 
+import java.util.Map
+import org.nanosite.xwarp.model.IPool
 import org.nanosite.xwarp.model.IStep
 import org.nanosite.xwarp.simulation.WIntAccuracy
 
@@ -11,6 +13,20 @@ class StepInstance {
 	var long tReady = 0L
 	var long tRunning = 0L
 	var long tDone = 0L
+	
+	static private class PoolState {
+		val public long amount
+		val public boolean overflow
+		val public boolean underflow
+		
+		new(long amount, boolean overflow, boolean underflow) {
+			this.amount = amount
+			this.overflow = overflow
+			this.underflow = underflow
+		}
+	}
+	
+	val Map<String, PoolState> poolStates = newHashMap
 	
 	new(IStep step) {
 		this.step = step
@@ -32,6 +48,11 @@ class StepInstance {
 		this.tDone = WIntAccuracy.toPrint(timestamp)
 	}
 	
+	def void addPoolState(IPool pool, long amount, boolean overflow, boolean underflow) {
+		val ps = new PoolState(amount, overflow, underflow)
+		poolStates.put(pool.name, ps)
+	}
+	
 	def getStep() {
 		step
 	}
@@ -50,6 +71,33 @@ class StepInstance {
 	
 	def getDoneTime() {
 		tDone
+	}
+	
+	def long getPoolUsage(String poolName) {
+		val ps = poolStates.get(poolName)
+		if (ps===null) {
+			0
+		} else {
+			ps.amount
+		}
+	}
+	
+	def boolean getPoolOverflow(String poolName) {
+		val ps = poolStates.get(poolName)
+		if (ps===null) {
+			false
+		} else {
+			ps.overflow
+		}
+	}
+	
+	def boolean getPoolUnderflow(String poolName) {
+		val ps = poolStates.get(poolName)
+		if (ps===null) {
+			false
+		} else {
+			ps.underflow
+		}
 	}
 	
 	def void dump() {

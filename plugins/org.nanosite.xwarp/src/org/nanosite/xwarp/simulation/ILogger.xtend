@@ -4,6 +4,7 @@ interface ILogger {
 	public enum Type {
 		TOKINFO,
 		TOKEN,
+		POOL,
 		INFO,
 		DEBUG,
 		

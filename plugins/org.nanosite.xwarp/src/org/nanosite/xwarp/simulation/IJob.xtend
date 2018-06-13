@@ -2,6 +2,7 @@ package org.nanosite.xwarp.simulation
 
 import java.util.Map
 import org.nanosite.xwarp.model.IConsumableAmount
+import org.nanosite.xwarp.model.IPool
 import org.nanosite.xwarp.model.IResource
 import org.nanosite.xwarp.result.StepInstance
 
@@ -16,6 +17,8 @@ interface IJob {
 	
 	def void useResource(IResource resource, long amount)
 	
+	def Map<IPool, Long> getPoolNeeds()
+	
 	def boolean isDone()
 	
 	def void exitActions()
@@ -25,5 +28,6 @@ interface IJob {
 	def void traceRunning(long timestamp)
 	def void traceDone(long timestamp)
 
+	def StepInstance getResult()
 	def StepInstance clearResult()
 }

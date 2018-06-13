@@ -6,6 +6,7 @@ import org.nanosite.xwarp.model.impl.WBandwidthResource
 import org.nanosite.xwarp.model.impl.WBehavior
 import org.nanosite.xwarp.model.impl.WConsumer
 import org.nanosite.xwarp.model.impl.WModel
+import org.nanosite.xwarp.model.impl.WPool
 import org.nanosite.xwarp.model.impl.WProcessor
 import org.nanosite.xwarp.model.impl.WResource
 import org.nanosite.xwarp.model.impl.WStep
@@ -22,6 +23,7 @@ class ModelBuilder {
 				switch(it) {
 					WResource: model.addResource(it)
 					WBandwidthResource: model.addBandwidthResource(it)
+					WPool: model.addPool(it)
 					WConsumer: model.addConsumer(it)
 					default: throw new RuntimeException("Unknown model item '" + it.name + "'")
 				}
@@ -41,6 +43,10 @@ class ModelBuilder {
 	
 	def IBandwidthResource resource(String name, List<Integer> cst) {
 		new WBandwidthResource(name, cst)
+	}
+	
+	def IPool pool(String name, long maxAmount) {
+		new WPool(name, maxAmount)
 	}
 	
 	def IConsumer consumer(String name) {

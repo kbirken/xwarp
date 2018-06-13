@@ -11,8 +11,10 @@ interface IStep extends IStepSuccessor, INamed {
 	def List<IStepSuccessor> getSuccessors()
 	def List<IStep> getPredecessors()
 	
-	def boolean hasResourceNeeds()
-	def void copyResourceNeeds(Map<IResource, IConsumableAmount> resourceNeedsCopy)
+	def boolean hasNonPoolNeeds()
+	def void copyNonPoolNeeds(Map<IResource, IConsumableAmount> nonPoolNeedsCopy)
 
+	def Map<IPool, Long> getPoolNeeds()
+	 
 	def boolean hasSameBehavior(IStep other)	
 }

@@ -4,12 +4,14 @@ import com.google.common.collect.ImmutableList
 import java.util.List
 import org.nanosite.xwarp.model.IBehavior
 import org.nanosite.xwarp.model.IModel
+import org.nanosite.xwarp.model.IPool
 import org.nanosite.xwarp.model.IResource
 
 class WModel implements IModel {
 
 	List<WResource> resources = newArrayList
 	List<WBandwidthResource> bandwidthResources = newArrayList
+	List<WPool> pools = newArrayList
 	List<WConsumer> consumers = newArrayList
 	List<WBehavior> initial = newArrayList 
 	
@@ -30,6 +32,11 @@ class WModel implements IModel {
 		true
 	}
 	
+	def boolean addPool(WPool pool) {
+		pools.add(pool)
+		true
+	}
+
 	def boolean addConsumer(WConsumer consumer) {
 		consumers.add(consumer)
 		true
@@ -49,6 +56,12 @@ class WModel implements IModel {
 		if (! initialized)
 			finishInitialisation
 		ImmutableList.copyOf(resources)
+	}
+
+	override List<IPool> getPools() {
+		if (! initialized)
+			finishInitialisation
+		ImmutableList.copyOf(pools)
 	}
 
 	override List<IBehavior> getInitial() {

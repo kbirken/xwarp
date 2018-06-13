@@ -2,8 +2,8 @@ package org.nanosite.xwarp.simulation
 
 import java.util.List
 import java.util.Map
-import org.nanosite.xwarp.model.IAmount
 import org.nanosite.xwarp.model.IConsumableAmount
+import org.nanosite.xwarp.model.IPool
 import org.nanosite.xwarp.model.IResource
 import org.nanosite.xwarp.model.IStep
 import org.nanosite.xwarp.result.StepInstance
@@ -16,7 +16,7 @@ class WActiveStep implements IJob {
 	
 	val List<IStep> waitingFor = newArrayList
 
-	Map<IResource, IConsumableAmount> currentResourceNeeds = newHashMap
+	Map<IResource, IConsumableAmount> currentNonPoolNeeds = newHashMap
 
 	var StepInstance result
 	
@@ -42,7 +42,7 @@ class WActiveStep implements IJob {
 			}
 		}
 
-		step.copyResourceNeeds(currentResourceNeeds)
+		step.copyNonPoolNeeds(currentNonPoolNeeds)
 	}
 	
 	def IStep getStep() {
@@ -58,15 +58,15 @@ class WActiveStep implements IJob {
 	}
 
 	override boolean hasResourceNeeds() {
-		step.hasResourceNeeds
+		step.hasNonPoolNeeds
 	}
 
 	override Map<IResource, IConsumableAmount> getResourceNeeds() {
-		currentResourceNeeds
+		currentNonPoolNeeds
 	}
 
 	override long getResourceNeed(IResource resource) {
-		val need = currentResourceNeeds.get(resource)
+		val need = currentNonPoolNeeds.get(resource)
 		if (need===null)
 			0L
 		else
@@ -74,7 +74,7 @@ class WActiveStep implements IJob {
 	}
 	
 	override void useResource(IResource resource, long amount) {
-		val remaining = currentResourceNeeds.get(resource).reduceAmount(amount)
+		val remaining = currentNonPoolNeeds.get(resource).reduceAmount(amount)
 		if (remaining<0) {
 			throw new RuntimeException(
 				"Internal error: negative resource need for " +
@@ -82,12 +82,16 @@ class WActiveStep implements IJob {
 			)
 		}
 		if (remaining == 0) {
-			currentResourceNeeds.remove(resource)
+			currentNonPoolNeeds.remove(resource)
 		}
 	}
 
+	override Map<IPool, Long> getPoolNeeds() {
+		step.poolNeeds
+	}
+
 	override boolean isDone() {
-		currentResourceNeeds.empty
+		currentNonPoolNeeds.empty
 	}
 	
 
@@ -145,6 +149,10 @@ class WActiveStep implements IJob {
 		result.doneTime = timestamp
 	}
 		
+	override StepInstance getResult() {
+		result
+	}
+	
 	override StepInstance clearResult() {
 		val previous = result
 		result = new StepInstance(step)

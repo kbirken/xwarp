@@ -3,6 +3,7 @@ package org.nanosite.xwarp.simulation
 import java.util.List
 import java.util.Map
 import org.nanosite.xwarp.model.IModel
+import org.nanosite.xwarp.model.IPool
 import org.nanosite.xwarp.model.IResource
 import org.nanosite.xwarp.result.SimResult
 
@@ -45,14 +46,14 @@ class WSimulator implements IScheduler {
 		var healthy = true
 		var iteration = 0
 		var nMax = 99 // 19999
-		//pools.init
 		while (healthy && iteration<=nMax && (!readyList.empty || !runningList.empty)) {
 			logger.log(1,
 				ILogger.Type.INFO,
 				'''ITER «String.format("%5d", iteration)»   (ready=«readyList.size»  running=«runningList.size»)'''
 			)
 
-			val ok = doIteration(model.resources/*pools, scheds, isLimited, loadfile*/);
+			val ok = doIteration(model.resources, model.pools
+									/*scheds, isLimited, loadfile*/);
 			if (!ok) {
 				// error message is printed inside iteration()
 				return null
@@ -67,10 +68,16 @@ class WSimulator implements IScheduler {
 			)
 		}
 		
+		// copy all pool states to simulation result
+		state.poolStates.forEach[result.addPoolState(it)]
+		
 		result
 	}
 
-	def private boolean doIteration(List<IResource> allResources) {
+	def private boolean doIteration(
+		List<IResource> allResources,
+		List<IPool> allPools
+	) {
 		// transfer ready steps to running (this might lead to new ready steps in between)
 		while (!readyList.empty) {
 			// copy ready list because loop might insert new jobs
@@ -83,10 +90,17 @@ class WSimulator implements IScheduler {
 				//_runningMap[step] = _time;
 	
 				// alloc/free pool resources of this step
-//				bool ok = pools.apply(step->getPoolRequests(), step, *this);
-//				if (!ok) {
-//					return false;
-//				}
+				for(pn : job.poolNeeds.entrySet) {
+					val poolState = state.getPoolState(pn.key)
+					poolState.handleRequest(pn.value)
+
+					// record current state of this pool as a result
+					job.result.addPoolState(pn.key,
+						poolState.allocated,
+						poolState.NOverflows>0,
+						poolState.NUnderflows>0
+					)
+				}
 	
 				if (job.hasResourceNeeds) {
 					runningList.add(job)
@@ -215,7 +229,8 @@ class WSimulator implements IScheduler {
 				sb.append(ru.asString)
 			}
 		}
-		log(3, ILogger.Type.DEBUG, sb.toString)
+		if (sb.length>0)
+			log(3, ILogger.Type.DEBUG, sb.toString)
 
 //		// record detailed results
 		val tDelta = WIntAccuracy.toPrint(overallMinDelta)
@@ -350,8 +365,9 @@ class WSimulator implements IScheduler {
 //		drawNode(step);
 //		_doneMap[step] = _time;
 
-		// collect simulation result data from job and add it to overall simulation result 
-		result.addInstance(job.clearResult)
+		// collect simulation result data from job and add it to overall simulation result
+		val stepInstance = job.clearResult
+		result.addInstance(stepInstance)
 	}
 	
 	def private log(int level, ILogger.Type type, String msg) {

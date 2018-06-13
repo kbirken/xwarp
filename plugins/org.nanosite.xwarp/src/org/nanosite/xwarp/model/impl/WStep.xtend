@@ -4,13 +4,15 @@ import com.google.common.collect.ImmutableList
 import java.util.List
 import java.util.Map
 import org.nanosite.xwarp.model.IConsumableAmount
+import org.nanosite.xwarp.model.IPool
 import org.nanosite.xwarp.model.IResource
 import org.nanosite.xwarp.model.IStep
 import org.nanosite.xwarp.model.IStepSuccessor
 
 class WStep extends WNamedElement implements IStep {
 	
-	val Map<IResource, WAmount> resourceNeeds = newHashMap
+	val Map<IResource, WAmount> nonPoolNeeds = newHashMap
+	val Map<IPool, Long> poolNeeds = newHashMap
 
 	WBehavior owner = null 
 	
@@ -30,13 +32,19 @@ class WStep extends WNamedElement implements IStep {
 
 		// add wait request, if any
 		if (waitTime>0L) {
-			this.resourceNeeds.put(WResource.waitResource, new WAmount(waitTime))
+			this.nonPoolNeeds.put(WResource.waitResource, new WAmount(waitTime))
 		}
 			
-		// scale needed loads and store it
 		if (resourceNeeds!==null) {
 			for(rn : resourceNeeds.entrySet) {
-				this.resourceNeeds.put(rn.key, new WAmount(rn.value))
+				val type = rn.key
+				if (type instanceof IPool) {
+					// pool request, just store it
+					this.poolNeeds.put(type, rn.value)
+				} else {
+					// scale needed loads and store it
+					this.nonPoolNeeds.put(type, new WAmount(rn.value))
+				}
 			}
 		}
 	}
@@ -71,13 +79,17 @@ class WStep extends WNamedElement implements IStep {
 		owner.firstStep == this
 	}
 
-	override boolean hasResourceNeeds() {
-		!resourceNeeds.empty
+	override boolean hasNonPoolNeeds() {
+		!nonPoolNeeds.empty
 	}
 
-	override void copyResourceNeeds(Map<IResource, IConsumableAmount> resourceNeedsCopy) {
-		resourceNeedsCopy.clear
-		resourceNeedsCopy.putAll(resourceNeeds)
+	override void copyNonPoolNeeds(Map<IResource, IConsumableAmount> nonPoolNeedsCopy) {
+		nonPoolNeedsCopy.clear
+		nonPoolNeedsCopy.putAll(nonPoolNeeds)
+	}
+
+	override def Map<IPool, Long> getPoolNeeds() {
+		poolNeeds
 	}
 	
 	override boolean hasSameBehavior(IStep other) {

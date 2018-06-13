@@ -1,6 +1,7 @@
 package org.nanosite.xwarp.tests
 
 import org.nanosite.xwarp.model.IModel
+import org.nanosite.xwarp.model.IPool
 import org.nanosite.xwarp.model.TestModelBuilder
 import org.nanosite.xwarp.result.SimResult
 import org.nanosite.xwarp.simulation.WLogger
@@ -44,5 +45,38 @@ class TestBase {
 		assertEquals(tWaitingExpected*MS, si.waitingTime)
 		assertEquals(tRunningExpected*MS, si.runningTime)
 		assertEquals(tDoneExpected*MS, si.doneTime)
+	}
+
+	def protected checkPool(
+		SimResult result,
+		String poolName,
+		long allocatedExpected,
+		int nOverflowsExpected,
+		int nUnderflowsExpected
+	) {
+		// search for part of pool name only
+		val pool = result.poolStates.findFirst[pool.name.contains(poolName)]
+		assertNotNull("Cannot find pool state for name '" + poolName + "'", pool)
+
+		assertEquals(allocatedExpected, pool.allocated)
+		assertEquals(nOverflowsExpected, pool.NOverflows)
+		assertEquals(nUnderflowsExpected, pool.NUnderflows)
+	}
+
+	def protected checkPool(
+		SimResult result,
+		String stepName,
+		String poolName,
+		long allocatedExpected,
+		boolean overflowExpected,
+		boolean underflowExpected
+	) {
+		// search for part of step name only
+		val si = result.stepInstances.findFirst[step.qualifiedName.contains(stepName)]
+		assertNotNull("Cannot find step result for name '" + stepName + "'", si)
+		
+		assertEquals(allocatedExpected, si.getPoolUsage(poolName))
+		assertEquals(overflowExpected, si.getPoolOverflow(poolName))
+		assertEquals(underflowExpected, si.getPoolUnderflow(poolName))
 	}
 }
