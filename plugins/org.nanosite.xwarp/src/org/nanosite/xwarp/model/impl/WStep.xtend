@@ -85,7 +85,7 @@ class WStep extends WNamedElement implements IStep {
 
 	override void copyNonPoolNeeds(Map<IResource, IConsumableAmount> nonPoolNeedsCopy) {
 		nonPoolNeedsCopy.clear
-		nonPoolNeedsCopy.putAll(nonPoolNeeds)
+		nonPoolNeeds.forEach[p1, p2 | nonPoolNeedsCopy.put(p1, p2.clone)]
 	}
 
 	override def Map<IPool, Long> getPoolNeeds() {

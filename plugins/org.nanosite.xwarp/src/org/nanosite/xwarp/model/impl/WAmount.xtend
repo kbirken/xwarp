@@ -11,6 +11,14 @@ class WAmount implements IConsumableAmount {
 		this.amount = convertAmount(amount)
 	}
 	
+	private new () { }
+	 
+	override WAmount clone() {
+		val cloned = new WAmount()
+		cloned.amount = amount
+		cloned
+	}
+
 	def private long convertAmount(long amountUser) {
 		// convert UI units to logical simulator units
 		val amount = Scaling.resourceUItoWarp * amountUser

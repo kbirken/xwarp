@@ -67,11 +67,19 @@ class ModelBuilder {
 	}
 	
 	def IBehavior behavior(String name) {
-		behavior(name, false)
+		behavior(name, 1, false)
 	}
 
-	def IBehavior behavior(String name, boolean shouldAddTokens) {
-		val behavior = new WBehavior(name, shouldAddTokens)
+	def IBehavior behavior(String name, int nIterations) {
+		behavior(name, nIterations, false)
+	}
+
+	def IBehavior behavior(
+		String name,
+		int nIterations,
+		boolean shouldAddTokens
+	) {
+		val behavior = new WBehavior(name, nIterations, shouldAddTokens)
 		justCreated(behavior)
 		behavior
 	}

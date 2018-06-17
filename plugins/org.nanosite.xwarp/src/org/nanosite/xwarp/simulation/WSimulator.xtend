@@ -359,15 +359,16 @@ class WSimulator implements IScheduler {
 	}
 
 	def private void jobDone(IJob job) {
-		job.exitActions()
-		log(1, ILogger.Type.DONE, job.qualifiedName)
 		job.traceDone(time)
-//		drawNode(step);
-//		_doneMap[step] = _time;
 
 		// collect simulation result data from job and add it to overall simulation result
 		val stepInstance = job.clearResult
 		result.addInstance(stepInstance)
+
+		job.exitActions()
+		log(1, ILogger.Type.DONE, job.qualifiedName)
+//		drawNode(step);
+//		_doneMap[step] = _time;
 	}
 	
 	def private log(int level, ILogger.Type type, String msg) {

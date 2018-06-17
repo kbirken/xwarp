@@ -7,6 +7,7 @@ import com.google.common.collect.ImmutableList
 
 class WBehavior extends WNamedElement implements IBehavior {
 	
+	val int nIterations
 	val boolean addToken
 		
 	List<WStep> steps = newArrayList
@@ -15,7 +16,12 @@ class WBehavior extends WNamedElement implements IBehavior {
 	WConsumer owner = null 
 	
 	new(String name, boolean addToken) {
+		this(name, 1, addToken)
+	}
+	
+	new(String name, int nIterations, boolean addToken) {
 		super(name)
+		this.nIterations = nIterations
 		this.addToken = addToken
 	}
 
@@ -36,6 +42,10 @@ class WBehavior extends WNamedElement implements IBehavior {
 	
 	override boolean shouldAddToken() {
 		addToken
+	}
+	
+	override int getNIterations() {
+		nIterations
 	}
 	
 	def boolean addStep(WStep step) {

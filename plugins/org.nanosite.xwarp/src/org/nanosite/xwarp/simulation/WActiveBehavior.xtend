@@ -51,16 +51,13 @@ class WActiveBehavior {
 		val firstStep = behavior.firstStep
 		if (firstStep===null) {
 			// there are no steps in this behavior, recursively call send triggers
-//			int n = 1;
-//			if (_type==LOOP_TYPE_REPEAT) {
-//				n = _p;
-//			}
+			val n = behavior.NIterations
 //			if (_type==LOOP_TYPE_UNLESS) {
 //				logger.fatal("invalid behavior %s: unless-condition given, but no steps", getQualifiedName().c_str());
 //			}
-//			for(int i=0; i<n; i++) {
-//				sendTriggers(from, eventAcceptor, logger);
-//			}
+			for(i : 0..n-1) {
+				sendTriggers(from)
+			}
 //	
 //			// prepare for next incoming message
 //			closeAction(logger);
@@ -123,55 +120,47 @@ class WActiveBehavior {
 //		prepareExecution();
 	
 //		_global_iteration++;
-//		_iteration++;
+		iteration++
 	
 		// TODO: fully implement "repeat" handling based on _type
-//		switch (_type) {
-//		case LOOP_TYPE_ONCE:
-//			// simple behavior, one execution per trigger
-//			break;
-//		case LOOP_TYPE_REPEAT:
-//			// repeat-loop (_p is loop count)
-//			if (_iteration<_p) {
-//				handleTrigger(from, eventAcceptor, logger);
-//				return;
-//			}
-//			break;
-//		case LOOP_TYPE_UNTIL:
-//			// NIY
-//			logger.fatal("invalid behavior %s - type %d not yet implemented\n", getQualifiedName().c_str(), _type);
-//			break;
-//		case LOOP_TYPE_UNLESS:
-//			if (! _current_unless_condition) {
-//				/*
-//				logger.log("INFO", "still waiting for unless condition in behavior %s: %s",
-//						getQualifiedName().c_str(),
-//						_unless_condition->getQualifiedName().c_str());
-//				*/
-//	
-//				// unless condition still false, do another loop
-//				handleTrigger(from, eventAcceptor, logger);
-//				return;
-//			} else {
-//				// unless condition is active, loop ends here
-//				eventAcceptor.signalUnless(_unless_condition, from);
-//			}
-//			break;
-//		default:
-//			// shouldn't happen
-//			logger.fatal("invalid behavior %s - unknown type %d\n", getQualifiedName().c_str(), _type);
-//		}
+		if (iteration < behavior.NIterations) {
+			// still iterations left, trigger myself
+			handleTrigger(from)
+		} else {
+			// last iteration
+//			switch (_type) {
+//			case LOOP_TYPE_UNTIL:
+//				// NIY
+//				logger.fatal("invalid behavior %s - type %d not yet implemented\n", getQualifiedName().c_str(), _type);
+//				break;
+//			case LOOP_TYPE_UNLESS:
+//				if (! _current_unless_condition) {
+//					/*
+//					logger.log("INFO", "still waiting for unless condition in behavior %s: %s",
+//							getQualifiedName().c_str(),
+//							_unless_condition->getQualifiedName().c_str());
+//					*/
+//		
+//					// unless condition still false, do another loop
+//					handleTrigger(from, eventAcceptor, logger);
+//					return;
+//				} else {
+//					// unless condition is active, loop ends here
+//					eventAcceptor.signalUnless(_unless_condition, from);
+//				}
+//				break;
 	
-		// prepare for next incoming message
-		iteration = 0
-		closeAction()
-	
-		// check if next message is already waiting
-		if (! queue.empty) {
-			currentMessage = queue.pop
-			log(2, currentMessage, "START")
-			val simState = state.getActiveStep(behavior.lastStep, this)
-			handleTrigger(simState)
+			// prepare for next incoming message
+			iteration = 0
+			closeAction()
+		
+			// check if next message is already waiting
+			if (! queue.empty) {
+				currentMessage = queue.pop
+				log(2, currentMessage, "START")
+				val simState = state.getActiveStep(behavior.lastStep, this)
+				handleTrigger(simState)
+			}
 		}
 	}
 
@@ -198,12 +187,8 @@ class WActiveBehavior {
 	}
 
 	def WToken genToken(WToken parent, IBehavior next) {
-		val info = next.qualifiedName
-		//if (_type!=LOOP_TYPE_ONCE) {
-		//sprintf(buf, "%d", _iteration);
-		//info += "%" + string(buf);
-		//}
-
+		val isLoop = behavior.NIterations>1
+		val info = '''«next.qualifiedName»«IF isLoop»%«iteration»«ENDIF»'''
 		WToken.create(info, parent, logger)
 	}
 

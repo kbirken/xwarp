@@ -1,13 +1,14 @@
 package org.nanosite.xwarp.tests
 
 import org.nanosite.xwarp.model.IModel
-import org.nanosite.xwarp.model.IPool
 import org.nanosite.xwarp.model.TestModelBuilder
 import org.nanosite.xwarp.result.SimResult
 import org.nanosite.xwarp.simulation.WLogger
 import org.nanosite.xwarp.simulation.WSimulator
 
 import static org.junit.Assert.assertEquals
+import static org.junit.Assert.assertFalse
+import static org.junit.Assert.assertTrue
 import static org.junit.Assert.assertNotNull
 
 class TestBase {
@@ -23,6 +24,7 @@ class TestBase {
 		val logger = new WLogger(4)
 		val simulator = new WSimulator(logger)
 		val result = simulator.simulate(model)
+		assertNotNull("Simulation didn't finish properly", result)
 		assertEquals(nStepsExpected, result.stepInstances.size)
 		if (dumpResult) {
 			println("---")
@@ -38,10 +40,30 @@ class TestBase {
 		long tRunningExpected,
 		long tDoneExpected
 	) {
+		check(result, stepName, 0,
+			tWaitingExpected,
+			tRunningExpected,
+			tDoneExpected
+		)
+	}
+	
+	def protected check(
+		SimResult result,
+		String stepName,
+		int instance,
+		long tWaitingExpected,
+		long tRunningExpected,
+		long tDoneExpected
+	) {
 		// search for part of step name only
-		val si = result.stepInstances.findFirst[step.qualifiedName.contains(stepName)]
-		assertNotNull("Cannot find step result for name '" + stepName + "'", si)
+		val instances = result.stepInstances.filter[step.qualifiedName.contains(stepName)]
+		assertFalse("Cannot find step result for name '" + stepName + "'", instances.empty)
+
+		assertTrue("Cannot find instance " + instance + " for step for name '" + stepName + "'",
+			instance < instances.size
+		)
 		
+		val si = instances.get(instance)
 		assertEquals(tWaitingExpected*MS, si.waitingTime)
 		assertEquals(tRunningExpected*MS, si.runningTime)
 		assertEquals(tDoneExpected*MS, si.doneTime)
