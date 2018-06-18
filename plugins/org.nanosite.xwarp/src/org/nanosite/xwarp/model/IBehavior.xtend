@@ -7,6 +7,7 @@ interface IBehavior extends IStepSuccessor, INamed {
 	def boolean shouldAddToken()
 	
 	def int getNIterations()
+	def IStep getUnlessCondition()
 	
 	def IStep getFirstStep()
 	def IStep getLastStep()

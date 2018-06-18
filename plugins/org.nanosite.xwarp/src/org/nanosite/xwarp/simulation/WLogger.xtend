@@ -19,8 +19,7 @@ class WLogger implements ILogger {
 	
 	override void log(int level, Type type, String txt) {
 		if (level<=loglevel) {
-			val time = String.format("%09d", WIntAccuracy.toPrint(currentTime))
-			println('''«time» «type.format»«txt»''')
+			println('''«time()» «type.format»«txt»''')
 		}
 	}
 
@@ -30,7 +29,19 @@ class WLogger implements ILogger {
 //		}
 //	}
 	
+	override void fatal(String txt) {
+		println('''«time()» «"FATAL".format»«txt»''')
+	}
+	
 	def private static format(Type type) {
+		format(type.toString)
+	}
+	
+	def private static format(String type) {
 		String.format("%-10s", type)
+	}
+	
+	def private String time() {
+		String.format("%09d", WIntAccuracy.toPrint(currentTime))
 	}
 }

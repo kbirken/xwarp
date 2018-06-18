@@ -13,6 +13,7 @@ class TestModelBuilder extends ModelBuilder {
 
 	Multimap<String, WBehavior> tobeAddedAsSendTrigger = ArrayListMultimap.create
 	Multimap<String, WStep> tobeAddedAsPrecondition = ArrayListMultimap.create
+	Multimap<String, WBehavior> tobeAddedAsUnlessCondition = ArrayListMultimap.create
 	
 	override protected void justCreated(IBehavior behavior) {
 		val key = behavior.name
@@ -26,6 +27,18 @@ class TestModelBuilder extends ModelBuilder {
 		}
 	}
 
+	def repeatUnless(IBehavior behavior, String unlessConditionStep) {
+		if (steps.containsKey(unlessConditionStep)) {
+			// unlessCondition step has already been created
+			val step = steps.get(unlessConditionStep)
+			repeatUnless(behavior, step)
+		} else {
+			// unlessCondition step will be created later
+			if (behavior instanceof WBehavior)
+				tobeAddedAsUnlessCondition.put(unlessConditionStep, behavior) 
+		}
+	}
+	
 	def send(IBehavior behavior, String triggeredBehavior) {
 		if (behaviors.containsKey(triggeredBehavior)) {
 			// triggered behavior has already been created
@@ -46,6 +59,13 @@ class TestModelBuilder extends ModelBuilder {
 			for(successor : tobeAddedAsPrecondition.get(key))
 				precondition(successor, step)
 			tobeAddedAsPrecondition.removeAll(key)
+		}
+		
+		// check if unlessCondition is waiting to be added
+		if (tobeAddedAsUnlessCondition.containsKey(key)) {
+			for(behavior : tobeAddedAsUnlessCondition.get(key))
+				repeatUnless(behavior, step)
+			tobeAddedAsUnlessCondition.removeAll(key)
 		}
 	}
 

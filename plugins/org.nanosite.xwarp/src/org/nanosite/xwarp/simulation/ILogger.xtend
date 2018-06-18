@@ -20,4 +20,5 @@ interface ILogger {
 	def void log(int level, Type type, String txt)
 //	def void logNoTime(int level, Type type, String txt)
 		
+	def void fatal(String txt)
 }

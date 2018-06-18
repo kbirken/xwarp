@@ -86,6 +86,13 @@ class ModelBuilder {
 
 	def protected void justCreated(IBehavior behavior) { }
 	
+	def void repeatUnless(IBehavior behavior, IStep unlessConditionStep) {
+		if (behavior instanceof WBehavior) {
+			if (unlessConditionStep instanceof WStep)
+				behavior.setUnlessCondition = unlessConditionStep
+		}
+	}
+	
 	def void add(IBehavior behavior, IStep step, IStep... steps) {
 		if (behavior instanceof WBehavior) {
 			if (step instanceof WStep)

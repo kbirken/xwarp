@@ -14,7 +14,9 @@ class WActiveBehavior {
 	
 	val WMessageQueue queue = new WMessageQueue
 	var WMessage currentMessage = null
+
 	var iteration = 0
+	var currentUnlessCondition = false
 	
 	new(
 		IBehavior behavior,
@@ -52,15 +54,15 @@ class WActiveBehavior {
 		if (firstStep===null) {
 			// there are no steps in this behavior, recursively call send triggers
 			val n = behavior.NIterations
-//			if (_type==LOOP_TYPE_UNLESS) {
-//				logger.fatal("invalid behavior %s: unless-condition given, but no steps", getQualifiedName().c_str());
-//			}
+			if (behavior.unlessCondition !== null) {
+				logger.fatal("invalid behavior " + qualifiedName + ": unless-condition given, but no steps")
+			}
 			for(i : 0..n-1) {
 				sendTriggers(from)
 			}
-//	
-//			// prepare for next incoming message
-//			closeAction(logger);
+	
+			// prepare for next incoming message
+			closeAction()
 		} else {
 			val job = state.getActiveStep(firstStep, this)
 			if (job.isWaiting) {
@@ -104,10 +106,9 @@ class WActiveBehavior {
 
 	// this is called to set 'unless' conditions
 	def private void done() {
-		println("TODO")
 		// we simply clear unless condition (forever)
 		// this will be checked before any execution of the loop
-//		_current_unless_condition = true;
+		currentUnlessCondition = true
 	}
 
 	def private void lastStepDone(WActiveStep from) {
@@ -126,28 +127,26 @@ class WActiveBehavior {
 		if (iteration < behavior.NIterations) {
 			// still iterations left, trigger myself
 			handleTrigger(from)
+		} else if (behavior.unlessCondition!==null) {
+			if (! currentUnlessCondition) {
+				/*
+				logger.log("INFO", "still waiting for unless condition in behavior %s: %s",
+						getQualifiedName().c_str(),
+						_unless_condition->getQualifiedName().c_str());
+				*/
+	
+				// unless condition still false, do another loop
+				handleTrigger(from)
+			} else {
+				// unless condition is active, loop ends here
+//				eventAcceptor.signalUnless(_unless_condition, from);
+			}
 		} else {
 			// last iteration
 //			switch (_type) {
 //			case LOOP_TYPE_UNTIL:
 //				// NIY
 //				logger.fatal("invalid behavior %s - type %d not yet implemented\n", getQualifiedName().c_str(), _type);
-//				break;
-//			case LOOP_TYPE_UNLESS:
-//				if (! _current_unless_condition) {
-//					/*
-//					logger.log("INFO", "still waiting for unless condition in behavior %s: %s",
-//							getQualifiedName().c_str(),
-//							_unless_condition->getQualifiedName().c_str());
-//					*/
-//		
-//					// unless condition still false, do another loop
-//					handleTrigger(from, eventAcceptor, logger);
-//					return;
-//				} else {
-//					// unless condition is active, loop ends here
-//					eventAcceptor.signalUnless(_unless_condition, from);
-//				}
 //				break;
 	
 			// prepare for next incoming message

@@ -9,7 +9,9 @@ class WBehavior extends WNamedElement implements IBehavior {
 	
 	val int nIterations
 	val boolean addToken
-		
+	
+	var WStep unlessCondition = null
+	
 	List<WStep> steps = newArrayList
 	List<IBehavior> sendTriggers = newArrayList
 	
@@ -46,6 +48,19 @@ class WBehavior extends WNamedElement implements IBehavior {
 	
 	override int getNIterations() {
 		nIterations
+	}
+	
+	override IStep getUnlessCondition() {
+		unlessCondition
+	}
+	
+	def boolean setUnlessCondition(WStep step) {
+		this.unlessCondition = step
+		
+		// add to successors of step in order to be notified if unless-condition is active
+		step.addSuccessor(this)
+
+		true
 	}
 	
 	def boolean addStep(WStep step) {
