@@ -5,6 +5,7 @@ import java.util.Map
 import org.nanosite.xwarp.model.IModel
 import org.nanosite.xwarp.model.IPool
 import org.nanosite.xwarp.model.IResource
+import org.nanosite.xwarp.result.IterationResult
 import org.nanosite.xwarp.result.SimResult
 
 class WSimulator implements IScheduler {
@@ -52,7 +53,7 @@ class WSimulator implements IScheduler {
 				'''ITER «String.format("%5d", iteration)»   (ready=«readyList.size»  running=«runningList.size»)'''
 			)
 
-			val ok = doIteration(model.resources, model.pools
+			val ok = doIteration(model.resources, model.pools, iteration
 									/*scheds, isLimited, loadfile*/);
 			if (!ok) {
 				// error message is printed inside iteration()
@@ -76,7 +77,8 @@ class WSimulator implements IScheduler {
 
 	def private boolean doIteration(
 		List<IResource> allResources,
-		List<IPool> allPools
+		List<IPool> allPools,
+		int nIteration
 	) {
 		// transfer ready steps to running (this might lead to new ready steps in between)
 		while (!readyList.empty) {
@@ -232,14 +234,15 @@ class WSimulator implements IScheduler {
 		if (sb.length>0)
 			log(3, ILogger.Type.DEBUG, sb.toString)
 
-//		// record detailed results
+		// record detailed results
 		val tDelta = WIntAccuracy.toPrint(overallMinDelta)
-//		result::CIterationResult* result = new result::CIterationResult(tDelta);
-//		_results.add(result);
-//		for(unsigned r=0; r<nRequests.size(); r++) {
-//			result->addResourceUsage(resources[r], stepsPerResource[r]);
-//		}
-//	
+		val IterationResult iterationResult = new IterationResult(nIteration, tDelta)
+		result.addIteration(iterationResult)
+		for(res : resourceUsages.keySet) {
+			val users = resourceUsages.get(res).users.filter(WActiveStep).map[step]
+			iterationResult.addResourceUsage(res, users)
+		}
+	
 //		// output to loadfile
 //		int dt = CIntAccuracy::toCalc(_timeWindowDiscrete);
 //		if (loadfile) {
@@ -262,7 +265,7 @@ class WSimulator implements IScheduler {
 //				_timeslotDiscrete++;
 //			}
 //		}
-//	
+	
 		// progress in time
 //		if (_verbose>1) {
 //			string loads = "";

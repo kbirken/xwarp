@@ -1,9 +1,9 @@
 package org.nanosite.xwarp.simulation
 
+import com.google.common.collect.Iterables
 import java.util.List
-import org.nanosite.xwarp.model.IBandwidthResource
-import org.nanosite.xwarp.model.IResource
 import org.nanosite.xwarp.model.IBandwidthResourceInterface
+import org.nanosite.xwarp.model.IResource
 
 class WResourceUsage {
 	
@@ -83,6 +83,10 @@ class WResourceUsage {
 		for(job : users) {
 			job.useResource(resource, dtNetto)
 		}
+	}
+	
+	def getUsers() {
+		users
 	}
 	
 	def asString() {
