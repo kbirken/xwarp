@@ -1,6 +1,5 @@
 package org.nanosite.xwarp.simulation
 
-import com.google.common.collect.Iterables
 import java.util.List
 import org.nanosite.xwarp.model.IBandwidthResourceInterface
 import org.nanosite.xwarp.model.IResource
