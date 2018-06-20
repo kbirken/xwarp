@@ -17,6 +17,7 @@ class WActiveBehavior {
 
 	var iteration = 0
 	var currentUnlessCondition = false
+	var finishedOnce = false
 	
 	new(
 		IBehavior behavior,
@@ -112,7 +113,7 @@ class WActiveBehavior {
 	}
 
 	def private void lastStepDone(WActiveStep from) {
-//		_finished_once = true;
+		finishedOnce = true
 	
 		// last step is done, send triggers
 		sendTriggers(from)
@@ -191,6 +192,9 @@ class WActiveBehavior {
 		WToken.create(info, parent, logger)
 	}
 
+	def boolean hasFinishedOnce() {
+		finishedOnce
+	}
 	
 	def private void log(int level, WMessage msg, String action) {
 		logger.log(

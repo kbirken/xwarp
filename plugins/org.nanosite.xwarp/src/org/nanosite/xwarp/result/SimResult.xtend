@@ -1,6 +1,7 @@
 package org.nanosite.xwarp.result
 
 import java.util.List
+import org.nanosite.xwarp.model.IBehavior
 import org.nanosite.xwarp.simulation.WPoolState
 
 class SimResult {
@@ -9,7 +10,9 @@ class SimResult {
 
 	List<StepInstance> stepInstances = newArrayList
 	List<WPoolState> poolStates = newArrayList
-	
+
+	List<IBehavior> remainingBehaviors = newArrayList
+		
 	def clear() {
 		iterations.clear
 		stepInstances.clear
@@ -28,6 +31,14 @@ class SimResult {
 		poolStates.add(ps)
 	}
 	
+	def addRemainingBehaviors(Iterable<IBehavior> behaviors) {
+		remainingBehaviors.addAll(behaviors)
+	}
+	
+	def getNIterations() {
+		iterations.size
+	}
+	
 	def getIterations() {
 		iterations
 	}
@@ -38,6 +49,10 @@ class SimResult {
 
 	def getPoolStates() {
 		poolStates
+	}
+	
+	def getRemainingBehaviors() {
+		remainingBehaviors
 	}
 
 	def dump() {

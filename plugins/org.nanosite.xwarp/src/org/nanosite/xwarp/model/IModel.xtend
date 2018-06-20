@@ -8,4 +8,5 @@ interface IModel {
 	def List<IPool> getPools()
 	def List<IBehavior> getInitial()
 	
+	def List<IConsumer> getConsumers()
 }

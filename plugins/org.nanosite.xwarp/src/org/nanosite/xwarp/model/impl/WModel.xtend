@@ -3,6 +3,7 @@ package org.nanosite.xwarp.model.impl
 import com.google.common.collect.ImmutableList
 import java.util.List
 import org.nanosite.xwarp.model.IBehavior
+import org.nanosite.xwarp.model.IConsumer
 import org.nanosite.xwarp.model.IModel
 import org.nanosite.xwarp.model.IPool
 import org.nanosite.xwarp.model.IResource
@@ -68,6 +69,12 @@ class WModel implements IModel {
 		if (! initialized)
 			finishInitialisation
 		ImmutableList.copyOf(initial)
+	}
+
+	override List<IConsumer> getConsumers() {
+		if (! initialized)
+			finishInitialisation
+		ImmutableList.copyOf(consumers)
 	}
 	
 }

@@ -40,6 +40,10 @@ class WSimState implements ISimState {
 		}
 	}
 	
+	def getActiveBehaviors() {
+		activeBehaviors
+	}
+	
 	override getActiveStep(IStep step, WActiveBehavior behavior) {
 		if (activeSteps.containsKey(step)) {
 			activeSteps.get(step)

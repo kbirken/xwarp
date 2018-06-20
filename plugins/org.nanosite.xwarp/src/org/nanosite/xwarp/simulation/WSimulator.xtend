@@ -1,5 +1,6 @@
 package org.nanosite.xwarp.simulation
 
+import com.google.common.collect.Sets
 import java.util.List
 import java.util.Map
 import org.nanosite.xwarp.model.IModel
@@ -72,6 +73,14 @@ class WSimulator implements IScheduler {
 		// copy all pool states to simulation result
 		state.poolStates.forEach[result.addPoolState(it)]
 		
+		// store all behaviors in simulation result which haven't been executed at least once
+		val started = state.activeBehaviors.keySet
+		val startedAndNeverFinished = state.activeBehaviors.filter[bhvr, state | ! state.hasFinishedOnce].keySet
+		val allBehaviors = model.consumers.map[behaviors].flatten.toSet
+		val neverStarted = Sets.difference(allBehaviors, started)
+		result.addRemainingBehaviors(startedAndNeverFinished)
+		result.addRemainingBehaviors(neverStarted)
+
 		result
 	}
 
