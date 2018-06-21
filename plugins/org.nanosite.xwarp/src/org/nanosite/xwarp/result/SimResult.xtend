@@ -2,6 +2,8 @@ package org.nanosite.xwarp.result
 
 import java.util.List
 import org.nanosite.xwarp.model.IBehavior
+import org.nanosite.xwarp.model.IPool
+import org.nanosite.xwarp.model.IStep
 import org.nanosite.xwarp.simulation.WPoolState
 
 class SimResult {
@@ -28,7 +30,7 @@ class SimResult {
 	}
 
 	def addPoolState(WPoolState ps) {
-		poolStates.add(ps)
+		poolStates.add(ps.clone)
 	}
 	
 	def addRemainingBehaviors(Iterable<IBehavior> behaviors) {
@@ -46,9 +48,19 @@ class SimResult {
 	def getStepInstances() {
 		stepInstances
 	}
+	
+	def Iterable<StepInstance> getStepInstances(IStep step) {
+		// TODO: introduce multimap for performance
+		stepInstances.filter[it.step==step]
+	}
 
 	def getPoolStates() {
 		poolStates
+	}
+	
+	def getPoolState(IPool pool) {
+		// TODO: introduce map for performance
+		poolStates.findFirst[it.pool==pool]
 	}
 	
 	def getRemainingBehaviors() {

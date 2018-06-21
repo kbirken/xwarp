@@ -6,6 +6,7 @@ import java.util.Map
 import org.nanosite.xwarp.model.IModel
 import org.nanosite.xwarp.model.IPool
 import org.nanosite.xwarp.model.IResource
+import org.nanosite.xwarp.model.impl.WResource
 import org.nanosite.xwarp.result.IterationResult
 import org.nanosite.xwarp.result.SimResult
 
@@ -245,7 +246,8 @@ class WSimulator implements IScheduler {
 
 		// record detailed results
 		val tDelta = WIntAccuracy.toPrint(overallMinDelta)
-		val IterationResult iterationResult = new IterationResult(nIteration, tDelta)
+		val IterationResult iterationResult =
+			new IterationResult(nIteration, tDelta, WResource.waitResource)
 		result.addIteration(iterationResult)
 		for(res : resourceUsages.keySet) {
 			val users = resourceUsages.get(res).users.filter(WActiveStep).map[step]

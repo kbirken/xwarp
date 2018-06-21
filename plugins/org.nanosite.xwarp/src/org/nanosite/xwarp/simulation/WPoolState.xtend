@@ -16,6 +16,23 @@ class WPoolState {
 		this.logger = logger
 	}
 	
+	private new (
+		IPool pool,
+		long allocated,
+		int nOverflows,
+		int nUnderflows
+	) {
+		this.pool = pool
+		this.logger = null
+		this.allocated = allocated
+		this.nOverflows = nOverflows
+		this.nUnderflows = nUnderflows
+	}
+	 
+	override WPoolState clone() {
+		new WPoolState(pool, allocated, nOverflows, nUnderflows)
+	}
+	
 	def IPool getPool() {
 		pool
 	}
