@@ -114,7 +114,7 @@ class BasicResourceTests extends TestBase {
 		]
 		
 		// create simulator and run simulation
-		val result = simulate(model, 2, true)
+		val result = simulate(model, 2, false)
 		result.check("B1S1", 0, 0, 1100)
 		result.check("B2S1", 0, 0, 1100)
 	}
@@ -151,7 +151,7 @@ class BasicResourceTests extends TestBase {
 		]
 		
 		// create simulator and run simulation
-		val result = simulate(model, 4, true)
+		val result = simulate(model, 4, false)
 		result.check("B1S1", 0, 0, 1100)
 		result.check("B1S2", 1100, 1100, 2300)
 		result.check("B2S1", 0, 0, 1100)

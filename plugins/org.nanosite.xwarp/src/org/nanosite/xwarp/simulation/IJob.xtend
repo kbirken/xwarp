@@ -4,6 +4,7 @@ import java.util.Map
 import org.nanosite.xwarp.model.IConsumableAmount
 import org.nanosite.xwarp.model.IPool
 import org.nanosite.xwarp.model.IResource
+import org.nanosite.xwarp.model.IScheduledConsumable
 import org.nanosite.xwarp.result.StepInstance
 
 interface IJob {
@@ -11,11 +12,12 @@ interface IJob {
 	def String getQualifiedName()
 	def boolean isWaiting()
 
-	def boolean hasResourceNeeds()
-	def Map<IResource, IConsumableAmount> getResourceNeeds()
-	def long getResourceNeed(IResource resource)
+	def boolean hasConsumableNeeds()
+	def Map<IScheduledConsumable, IConsumableAmount> getConsumableNeeds()
+	def long getConsumableNeed(IScheduledConsumable consumable)
+	def long getResourcePenalty(IResource resource)
 	
-	def void useResource(IResource resource, long amount)
+	def void useConsumable(IScheduledConsumable resource, long amount)
 	
 	def Map<IPool, Long> getPoolNeeds()
 	

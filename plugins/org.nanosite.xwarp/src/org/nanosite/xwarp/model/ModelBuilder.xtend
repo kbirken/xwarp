@@ -2,7 +2,6 @@ package org.nanosite.xwarp.model
 
 import java.util.List
 import java.util.Map
-import org.nanosite.xwarp.model.impl.WBandwidthResource
 import org.nanosite.xwarp.model.impl.WBehavior
 import org.nanosite.xwarp.model.impl.WConsumer
 import org.nanosite.xwarp.model.impl.WModel
@@ -21,8 +20,7 @@ class ModelBuilder {
 		if (model instanceof WModel) {
 			items.forEach[
 				switch(it) {
-					WResource: model.addResource(it)
-					WBandwidthResource: model.addBandwidthResource(it)
+					IScheduledConsumable: model.addScheduledConsumable(it)
 					WPool: model.addPool(it)
 					WConsumer: model.addConsumer(it)
 					default: throw new RuntimeException("Unknown model item '" + it.name + "'")
@@ -41,15 +39,15 @@ class ModelBuilder {
 		new WProcessor(name)
 	}
 	
-	def IBandwidthResource resource(String name, List<Integer> cst) {
-		new WBandwidthResource(name, cst)
+	def IResource resource(String name, List<Integer> cst) {
+		new WResource(name, cst)
 	}
 	
 	def IPool pool(
 		String name,
 		long maxAmount,
-		IPool.ErrorAction onOverflow,
-		IPool.ErrorAction onUnderflow
+		IAllocatingConsumable.ErrorAction onOverflow,
+		IAllocatingConsumable.ErrorAction onUnderflow
 	) {
 		new WPool(name, maxAmount, onOverflow, onUnderflow)
 	}
@@ -113,17 +111,17 @@ class ModelBuilder {
 		step
 	}
 
-	def IBandwidthResourceInterface ri(IBandwidthResource res, int interfaceIndex) {
-		res.interfaces.get(interfaceIndex)
+	def WStep.ResourceInterface ri(IResource res, int interfaceIndex) {
+		new WStep.ResourceInterface(res, interfaceIndex)
 	}
 
-	def IStep step(String name, Map<IResource, Long> resourceNeeds) {
+	def IStep step(String name, Map<IConsumable, Long> resourceNeeds) {
 		val step = new WStep(name, resourceNeeds)
 		justCreated(step)
 		step
 	}
 
-	def IStep step(String name, long waitTime, Map<IResource, Long> resourceNeeds) {
+	def IStep step(String name, long waitTime, Map<IConsumable, Long> resourceNeeds) {
 		val step = new WStep(name, waitTime, resourceNeeds)
 		justCreated(step)
 		step

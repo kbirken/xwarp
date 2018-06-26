@@ -1,21 +1,19 @@
 package org.nanosite.xwarp.model.impl
 
+import java.util.List
 import org.nanosite.xwarp.model.IResource
 
-class WResource extends WNamedElement implements IResource {
+class WResource extends WScheduledConsumable implements IResource {
 	
-	// the wait-resource is unlimited per definition
-	val public static WResource waitResource = new WResource("wait", false)
+	List<Integer> cst = newArrayList
 	
-	val boolean isLimited
+	new(String name, List<Integer> contextSwitchingTimes) {
+		super(name, true)
 		
-	new(String name, boolean isLimited) {
-		super(name)
-		this.isLimited = isLimited
+		cst.addAll(contextSwitchingTimes)
 	}
 	
-	override boolean isLimited() {
-		isLimited
+	override int getCST(int index) {
+		cst.get(index)
 	}
-	
 }

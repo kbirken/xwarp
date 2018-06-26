@@ -2,6 +2,8 @@ package org.nanosite.xwarp.simulation
 
 import org.nanosite.xwarp.model.IPool
 
+import static org.nanosite.xwarp.model.IAllocatingConsumable.ErrorAction.*
+
 class WPoolState {
 
 	val IPool pool
@@ -74,9 +76,9 @@ class WPoolState {
 
 
 	def private boolean isStopped() {
-		if (nOverflows>0 && pool.onOverflow==IPool.ErrorAction.STOP_WORKING) {
+		if (nOverflows>0 && pool.onOverflow==STOP_WORKING) {
 			true
-		} else if (nUnderflows>0 && pool.onUnderflow==IPool.ErrorAction.STOP_WORKING) {
+		} else if (nUnderflows>0 && pool.onUnderflow==STOP_WORKING) {
 			true
 		} else
 			false
@@ -99,14 +101,14 @@ class WPoolState {
 
 	def private void handleOverflow(long amount) {
 		nOverflows++
-		if (pool.onOverflow==IPool.ErrorAction.EXECUTE_AND_CONTINUE) {
+		if (pool.onOverflow==EXECUTE_AND_CONTINUE) {
 			alloc(amount)
 		}
 	}
 	
 	def private void handleUnderflow(long amount) {
 		nUnderflows++
-		if (pool.onUnderflow==IPool.ErrorAction.EXECUTE_AND_CONTINUE) {
+		if (pool.onUnderflow==EXECUTE_AND_CONTINUE) {
 			alloc(amount)
 		}
 	}

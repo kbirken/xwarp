@@ -3,10 +3,10 @@ package org.nanosite.xwarp.simulation
 import com.google.common.collect.Sets
 import java.util.List
 import java.util.Map
+import org.nanosite.xwarp.model.IAllocatingConsumable
 import org.nanosite.xwarp.model.IModel
-import org.nanosite.xwarp.model.IPool
-import org.nanosite.xwarp.model.IResource
-import org.nanosite.xwarp.model.impl.WResource
+import org.nanosite.xwarp.model.IScheduledConsumable
+import org.nanosite.xwarp.model.impl.WUnlimitedResource
 import org.nanosite.xwarp.result.IterationResult
 import org.nanosite.xwarp.result.SimResult
 
@@ -55,8 +55,12 @@ class WSimulator implements IScheduler {
 				'''ITER «String.format("%5d", iteration)»   (ready=«readyList.size»  running=«runningList.size»)'''
 			)
 
-			val ok = doIteration(model.resources, model.pools, iteration
-									/*scheds, isLimited, loadfile*/);
+			val ok = doIteration(
+				model.scheduledConsumables,
+				model.allocatingConsumables,
+				iteration
+				/*scheds, isLimited, loadfile*/
+			);
 			if (!ok) {
 				// error message is printed inside iteration()
 				return null
@@ -86,8 +90,8 @@ class WSimulator implements IScheduler {
 	}
 
 	def private boolean doIteration(
-		List<IResource> allResources,
-		List<IPool> allPools,
+		List<IScheduledConsumable> allScheduledConsumables,
+		List<IAllocatingConsumable> allPools,
 		int nIteration
 	) {
 		// transfer ready steps to running (this might lead to new ready steps in between)
@@ -114,7 +118,7 @@ class WSimulator implements IScheduler {
 					)
 				}
 	
-				if (job.hasResourceNeeds) {
+				if (job.hasConsumableNeeds) {
 					runningList.add(job)
 					job.traceRunning(time)
 				} else {
@@ -132,13 +136,13 @@ class WSimulator implements IScheduler {
 //		vector<vector<int> > stepsPerResource;
 //		nRequests.resize(sums.size());
 //		stepsPerResource.resize(sums.size());
-		val Map<IResource, WResourceUsage> resourceUsages = newHashMap
+		val Map<IScheduledConsumable, WScheduledConsumableUsage> resourceUsages = newHashMap
 		for(job : runningList) {
-			for(res : job.resourceNeeds.keySet) {
+			for(res : job.consumableNeeds.keySet) {
 				if (! resourceUsages.containsKey(res)) {
-					resourceUsages.put(res, new WResourceUsage(res))
+					resourceUsages.put(res, new WScheduledConsumableUsage(res))
 				}
-				val amount = job.resourceNeeds.get(res)
+				val amount = job.consumableNeeds.get(res)
 				resourceUsages.get(res).request(amount.amount, job)
 			}
 //			for(unsigned i=0; i<sums.size(); i++) {
@@ -218,12 +222,13 @@ class WSimulator implements IScheduler {
 		for(job : runningList) {
 			val sb = new StringBuffer
 			sb.append("    ")
-			for(res : allResources) {
-				val ru = resourceUsages.get(res)
+			for(consumable : allScheduledConsumables) {
+				//sb.append("|" + consumable.name + " ")
+				val ru = resourceUsages.get(consumable)
 				if (ru!==null)
 					sb.append(ru.logUsedByJob(job))
 				else
-					sb.append(WResourceUsage.logNotUsed)
+					sb.append(WScheduledConsumableUsage.logNotUsed)
 			}
 			sb.append("\t")
 			sb.append(job.qualifiedName)
@@ -235,7 +240,7 @@ class WSimulator implements IScheduler {
 			if (resourceUsages.empty) 0L else resourceUsages.values.map[minDelta].min
 //		val boolean logstart = true;
 		val sb = new StringBuilder
-		for(res : allResources) {
+		for(res : allScheduledConsumables) {
 			val ru = resourceUsages.get(res)
 			if (ru!==null) {
 				sb.append(ru.asString)
@@ -247,7 +252,7 @@ class WSimulator implements IScheduler {
 		// record detailed results
 		val tDelta = WIntAccuracy.toPrint(overallMinDelta)
 		val IterationResult iterationResult =
-			new IterationResult(nIteration, tDelta, WResource.waitResource)
+			new IterationResult(nIteration, tDelta, WUnlimitedResource.waitResource)
 		result.addIteration(iterationResult)
 		for(res : resourceUsages.keySet) {
 			val users = resourceUsages.get(res).users.filter(WActiveStep).map[step]
@@ -277,51 +282,31 @@ class WSimulator implements IScheduler {
 //			}
 //		}
 	
-		// progress in time
-//		if (_verbose>1) {
-//			string loads = "";
-//			// update book-keeping
-//			for(unsigned r=0; r<nRequests.size(); r++) {
-//				if (nRequests[r] > 0) {
-//					sums[r] -= overallMinDelta;
-//	
-//					// limit sum to positive values
-//					if (sums[r]<0) {
-//						sums[r] = 0;
-//					}
-//				}
-//			}
-//			for(unsigned r=1; r<nRequests.size(); r++) {
-//				if (nRequests[r] > 0) {
-//					static char txt[128];
-//					sprintf(txt, "%s/%d", resources[r]->getName(), CIntAccuracy::toPrint(sums[r]));
-//					loads += string(" ") + string(txt);
-//				}
-//			}
-			val sb1 = new StringBuilder
-			sb1.append('''DELTA=«tDelta» ''')
-			for(res : allResources) {
-				val ru = resourceUsages.get(res)
-				if (ru!==null) {
-					val remaining = ru.sum - overallMinDelta
-					sb1.append(''' «res.name»/«WIntAccuracy.toPrint(remaining)»''')
-				}
+		val sb1 = new StringBuilder
+		sb1.append('''DELTA=«tDelta» ''')
+		for(res : allScheduledConsumables) {
+			val ru = resourceUsages.get(res)
+			if (ru!==null) {
+				val remaining = ru.sum - overallMinDelta
+				val remainingLimited = if (remaining<0) 0 else remaining
+				sb1.append(''' «res.name»/«WIntAccuracy.toPrint(remainingLimited)»''')
 			}
-			log(1, ILogger.Type.INFO, sb1.toString)
-//		}
-//	
-//		// overflow check
-//		if (overallMinDelta<0) {
-//			fatal("arithmetic overflow (DELTA=%d)\n", overallMinDelta);
-//			return false;
-//		}
-//	
+		}
+		log(1, ILogger.Type.INFO, sb1.toString)
+	
+		// overflow check
+		if (overallMinDelta<0) {
+			logger.fatal('''arithmetic overflow (DELTA=«overallMinDelta»)''')
+			return false
+		}
+	
+		// progress in time
 		time += overallMinDelta;
 		logger.updateCurrentTime(time)
 
 		// overflow check
 		if (time<0) {
-			//fatal("arithmetic overflow (TIME=%d)\n", time);
+			logger.fatal('''arithmetic overflow (TIME=«time»)''')
 			return false
 		}
 

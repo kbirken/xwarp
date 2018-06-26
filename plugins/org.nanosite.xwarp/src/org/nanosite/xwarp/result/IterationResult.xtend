@@ -1,8 +1,9 @@
 package org.nanosite.xwarp.result
 
-import java.util.List
+import com.google.common.collect.Sets
+import java.util.Collection
 import java.util.Map
-import org.nanosite.xwarp.model.IResource
+import org.nanosite.xwarp.model.IConsumable
 import org.nanosite.xwarp.model.IStep
 import org.nanosite.xwarp.simulation.WIntAccuracy
 
@@ -10,11 +11,11 @@ class IterationResult {
 	
 	val int n
 	val long deltaT
-	val IResource waitResource
+	val IConsumable waitResource
 	
-	val Map<IResource, List<IStep>> resourceUsers = newHashMap
+	val Map<IConsumable, Collection<IStep>> resourceUsers = newHashMap
 	
-	new (int n, long deltaT, IResource waitResource) {
+	new (int n, long deltaT, IConsumable waitResource) {
 		this.n = n
 		this.deltaT = deltaT
 		this.waitResource = waitResource
@@ -28,8 +29,14 @@ class IterationResult {
 		deltaT
 	}
 		
-	def void addResourceUsage(IResource res, Iterable<IStep> users) {
-		resourceUsers.put(res, users.toList)
+	def void addResourceUsage(IConsumable res, Iterable<IStep> users) {
+		if (resourceUsers.containsKey(res)) {
+			// merge both lists
+			val both = Sets.union(resourceUsers.get(res).toSet, users.toSet)
+			resourceUsers.put(res, both)
+		} else {
+			resourceUsers.put(res, users.toSet)
+		}
 	}
 	
 	def getWaitResourceUsage() {

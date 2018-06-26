@@ -5,6 +5,7 @@ import java.util.Map
 import org.nanosite.xwarp.model.IConsumableAmount
 import org.nanosite.xwarp.model.IPool
 import org.nanosite.xwarp.model.IResource
+import org.nanosite.xwarp.model.IScheduledConsumable
 import org.nanosite.xwarp.model.IStep
 import org.nanosite.xwarp.result.StepInstance
 
@@ -16,7 +17,7 @@ class WActiveStep implements IJob {
 	
 	val List<IStep> waitingFor = newArrayList
 
-	Map<IResource, IConsumableAmount> currentNonPoolNeeds = newHashMap
+	Map<IScheduledConsumable, IConsumableAmount> currentNonPoolNeeds = newHashMap
 
 	var StepInstance result
 	
@@ -57,30 +58,37 @@ class WActiveStep implements IJob {
 		! waitingFor.empty
 	}
 
-	override boolean hasResourceNeeds() {
+	override boolean hasConsumableNeeds() {
 		step.hasNonPoolNeeds
 	}
 
-	override Map<IResource, IConsumableAmount> getResourceNeeds() {
+	override Map<IScheduledConsumable, IConsumableAmount> getConsumableNeeds() {
 		currentNonPoolNeeds
 	}
 
-	override long getResourceNeed(IResource resource) {
-		val need = currentNonPoolNeeds.get(resource)
+	override long getConsumableNeed(IScheduledConsumable consumable) {
+		val need = currentNonPoolNeeds.get(consumable)
 		if (need===null)
 			0L
 		else
 			need.amount
 	}
+
+	override long getResourcePenalty(IResource resource) {
+		step.getResourcePenalty(resource)
+	}
 	
-	override void useResource(IResource resource, long amount) {
-		val remaining = currentNonPoolNeeds.get(resource).reduceAmount(amount)
-		if (remaining<0) {
+	override void useConsumable(IScheduledConsumable resource, long requiredAmount) {
+		val res = currentNonPoolNeeds.get(resource)
+		val available = res.amount
+		if (requiredAmount>available) {
 			throw new RuntimeException(
 				"Internal error: negative resource need for " +
-				"resource '" + resource.name + "', shouldn't occur!"
+				"resource '" + resource.name + "' " +
+				"(available=" + available + ", required=" + requiredAmount + ")!"
 			)
 		}
+		val remaining = res.reduceAmount(requiredAmount)
 		if (remaining == 0) {
 			currentNonPoolNeeds.remove(resource)
 		}

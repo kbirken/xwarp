@@ -1,5 +1,5 @@
 package org.nanosite.xwarp.model
 
-interface IProcessor extends IResource {
+interface IProcessor extends IScheduledConsumable {
 	
 }

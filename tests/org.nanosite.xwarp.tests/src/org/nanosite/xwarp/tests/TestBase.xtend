@@ -21,7 +21,7 @@ class TestBase {
 	protected final int MS = 1000;
 
 	def protected SimResult simulate(IModel model, int nStepsExpected, boolean dumpResult) {
-		val logger = new WLogger(4)
+		val logger = new WLogger(1)
 		val simulator = new WSimulator(logger)
 		val result = simulator.simulate(model)
 		assertNotNull("Simulation didn't finish properly", result)
@@ -30,6 +30,7 @@ class TestBase {
 			println("---")
 			result.dump
 		}
+		println("-------------------------------------------")
 		result
 	}
 
@@ -64,9 +65,9 @@ class TestBase {
 		)
 		
 		val si = instances.get(instance)
-		assertEquals(tWaitingExpected*MS, si.waitingTime)
-		assertEquals(tRunningExpected*MS, si.runningTime)
-		assertEquals(tDoneExpected*MS, si.doneTime)
+		assertEquals(tWaitingExpected, si.waitingTime/MS)
+		assertEquals(tRunningExpected, si.runningTime/MS)
+		assertEquals(tDoneExpected, si.doneTime/MS)
 	}
 
 	def protected checkPool(

@@ -2,17 +2,17 @@ package org.nanosite.xwarp.model.impl
 
 import com.google.common.collect.ImmutableList
 import java.util.List
+import org.nanosite.xwarp.model.IAllocatingConsumable
 import org.nanosite.xwarp.model.IBehavior
 import org.nanosite.xwarp.model.IConsumer
 import org.nanosite.xwarp.model.IModel
-import org.nanosite.xwarp.model.IPool
-import org.nanosite.xwarp.model.IResource
+import org.nanosite.xwarp.model.IScheduledConsumable
 
 class WModel implements IModel {
 
-	List<WResource> resources = newArrayList
-	List<WBandwidthResource> bandwidthResources = newArrayList
-	List<WPool> pools = newArrayList
+	List<IScheduledConsumable> scheduledConsumables = newArrayList
+	List<IAllocatingConsumable> allocatingConsumables = newArrayList
+
 	List<WConsumer> consumers = newArrayList
 	List<WBehavior> initial = newArrayList 
 	
@@ -20,21 +20,16 @@ class WModel implements IModel {
 	
 	new() {
 		// add wait resource
-		resources.add(WResource.waitResource)
+		scheduledConsumables.add(WUnlimitedResource.waitResource)
 	}
 	
-	def boolean addResource(WResource res) {
-		resources.add(res)
-		true
-	}
-	
-	def boolean addBandwidthResource(WBandwidthResource res) {
-		bandwidthResources.add(res)
+	def boolean addScheduledConsumable(IScheduledConsumable res) {
+		scheduledConsumables.add(res)
 		true
 	}
 	
 	def boolean addPool(WPool pool) {
-		pools.add(pool)
+		allocatingConsumables.add(pool)
 		true
 	}
 
@@ -53,16 +48,16 @@ class WModel implements IModel {
 		initialized = true
 	}
 
-	override List<IResource> getResources() {
+	override List<IScheduledConsumable> getScheduledConsumables() {
 		if (! initialized)
 			finishInitialisation
-		ImmutableList.copyOf(resources)
+		ImmutableList.copyOf(scheduledConsumables)
 	}
 
-	override List<IPool> getPools() {
+	override List<IAllocatingConsumable> getAllocatingConsumables() {
 		if (! initialized)
 			finishInitialisation
-		ImmutableList.copyOf(pools)
+		ImmutableList.copyOf(allocatingConsumables)
 	}
 
 	override List<IBehavior> getInitial() {

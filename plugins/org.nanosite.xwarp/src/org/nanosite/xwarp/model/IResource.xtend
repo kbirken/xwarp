@@ -1,10 +1,10 @@
 package org.nanosite.xwarp.model
 
 /**
- * A resource is anything that can be consumed.
+ * Interface for resources which provide bandwidth
+ * and can be used in different ways (i.e., sets of parameters).</p>
  */
-interface IResource extends INamed {
+interface IResource extends IScheduledConsumable {
 	
-	def boolean isLimited()
-	
+	def int getCST(int index)
 }

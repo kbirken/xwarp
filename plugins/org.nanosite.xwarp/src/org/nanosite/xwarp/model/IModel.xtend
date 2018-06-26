@@ -4,9 +4,9 @@ import java.util.List
 
 interface IModel {
 	
-	def List<IResource> getResources()
-	def List<IPool> getPools()
-	def List<IBehavior> getInitial()
+	def List<IScheduledConsumable> getScheduledConsumables()
+	def List<IAllocatingConsumable> getAllocatingConsumables()
 	
 	def List<IConsumer> getConsumers()
+	def List<IBehavior> getInitial()
 }

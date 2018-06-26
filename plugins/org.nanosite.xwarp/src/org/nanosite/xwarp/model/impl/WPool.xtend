@@ -36,9 +36,4 @@ class WPool extends WNamedElement implements IPool {
 	override onUnderflow() {
 		onUnderflow
 	}
-	
-	override isLimited() {
-		true
-	}
-	
 }
