@@ -24,20 +24,25 @@ class WScheduledConsumableUsage {
 
 	def computeMin() {
 		// TODO: also handle more advanced schedulers
-		val sharing = users.size > 1
 		for(job : users) {
-			var amount = job.getConsumableNeed(consumable)
-			if (sharing) {
-				if (consumable instanceof IResource) {
-					val cst = job.getResourcePenalty(consumable)
-					val penalty = amount * cst 
-					amount += WIntAccuracy.div(penalty, 1000L)
-				}
-			}
+			val amount = job.computeRequiredAmount
 			if (amount>0 && amount<min) {
 				min = amount
 			}
 		}
+	}
+	
+	def private long computeRequiredAmount(IJob job) {
+		var amount = job.getConsumableNeed(consumable)
+		val sharing = users.size > 1
+		if (sharing) {
+			if (consumable instanceof IResource) {
+				val cst = job.getResourcePenalty(consumable)
+				val penalty = amount * cst 
+				amount += WIntAccuracy.div(penalty, 1000L)
+			}
+		}
+		amount
 	}
 	
 	def long getSum() {
@@ -91,12 +96,13 @@ class WScheduledConsumableUsage {
 	}
 	
 	def logUsedByJob(IJob job) {
-		val sumScaled = WIntAccuracy.toPrint(sum)
-		val byJob = job.getConsumableNeed(consumable)
-		if (byJob<=0)
-			format(sumScaled, 0L)
-		else
-			format(sumScaled, WIntAccuracy.toPrint(byJob))
+		val amount = job.getConsumableNeed(consumable)
+		val amountReal = job.computeRequiredAmount
+		if (amount<=0) {
+			format(0L, 0L)
+		} else {
+			format(WIntAccuracy.toPrint(amount), WIntAccuracy.toPrint(amountReal))
+		}
 	}	
 
 	def static logNotUsed() {
