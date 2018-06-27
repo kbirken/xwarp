@@ -91,7 +91,8 @@ class WActiveBehavior {
 		// all has been consumed => tell successors that we are ready
 		for(succ : successors) {
 			if (succ instanceof IStep) {
-				val simStep = state.getActiveStep(succ, this)
+				val simBehavior = state.getActiveBehavior(succ.owner, scheduler)
+				val simStep = state.getActiveStep(succ, simBehavior)
 				simStep.triggerWaiting(step, scheduler)
 			} else if (succ instanceof IBehavior) {
 				val simBehavior = state.getActiveBehavior(succ, scheduler)

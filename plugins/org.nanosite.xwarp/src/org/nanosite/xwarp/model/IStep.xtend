@@ -31,6 +31,7 @@ interface IStep extends IStepSuccessor, INamed {
 		}
 	}
 	
+	def IBehavior getOwner()
 	def boolean isFirst()
 
 	def List<IStepSuccessor> getSuccessors()

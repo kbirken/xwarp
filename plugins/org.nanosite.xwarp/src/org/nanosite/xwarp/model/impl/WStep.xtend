@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableList
 import com.google.common.collect.Multimap
 import java.util.List
 import java.util.Map
+import org.nanosite.xwarp.model.IBehavior
 import org.nanosite.xwarp.model.IConsumable
 import org.nanosite.xwarp.model.IConsumableAmount
 import org.nanosite.xwarp.model.IPool
@@ -114,6 +115,10 @@ class WStep extends WNamedElement implements IStep {
 		'''«owner.qualifiedName»::«name»'''
 	}
 	
+	override IBehavior getOwner() {
+		owner
+	}
+
 	override boolean isFirst() {
 		owner.firstStep == this
 	}

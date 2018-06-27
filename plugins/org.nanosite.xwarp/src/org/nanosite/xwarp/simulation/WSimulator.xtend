@@ -88,7 +88,7 @@ class WSimulator implements IScheduler {
 
 		result
 	}
-
+	
 	def private boolean doIteration(
 		List<IScheduledConsumable> allScheduledConsumables,
 		List<IAllocatingConsumable> allPools,
