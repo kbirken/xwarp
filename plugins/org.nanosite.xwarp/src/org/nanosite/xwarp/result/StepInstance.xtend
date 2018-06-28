@@ -112,5 +112,10 @@ class StepInstance {
 		println('''   «String.format("%09d", tRunning)» RUNNING''')
 
 		println('''   «String.format("%09d", tDone)» DONE''')
+		
+		for(pool : poolStates.keySet) {
+			val ps = poolStates.get(pool)
+			println('''   pool state '«pool»': «ps.amount»«IF ps.overflow» overflow!«ENDIF»«IF ps.underflow» underflow!«ENDIF»''')
+		}
 	}
 }
