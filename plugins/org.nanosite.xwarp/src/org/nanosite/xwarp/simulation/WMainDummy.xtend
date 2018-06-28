@@ -12,7 +12,7 @@ import org.nanosite.xwarp.model.ModelBuilder
  */
 class WMainDummy {
 
-	protected static extension ModelBuilder = new ModelBuilder
+	protected static extension ModelBuilder = new ModelBuilder(ModelBuilder.Unit.MILLISECONDS)
 
 	def static void main(String[] args) {
 		// build example model

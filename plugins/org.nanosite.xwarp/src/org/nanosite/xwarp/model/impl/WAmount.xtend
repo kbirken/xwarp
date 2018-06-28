@@ -8,7 +8,8 @@ class WAmount implements IConsumableAmount {
 	var long amount
 	
 	new (long amount) {
-		this.amount = convertAmount(amount)
+		// convert logical simulator units to actual calculation units 
+		this.amount = WIntAccuracy.toCalc(amount) 
 	}
 	
 	private new () { }
@@ -19,14 +20,6 @@ class WAmount implements IConsumableAmount {
 		cloned
 	}
 
-	def private long convertAmount(long amountUser) {
-		// convert UI units to logical simulator units
-		val amount = Scaling.resourceUItoWarp * amountUser
-		
-		// convert logical simulator units to actual calculation units 
-		WIntAccuracy.toCalc(amount) 
-	}
-	
 	override long reduceAmount(long delta) {
 		amount = amount - delta
 		amount

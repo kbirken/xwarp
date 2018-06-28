@@ -12,6 +12,18 @@ import org.nanosite.xwarp.model.impl.WStep
 
 class ModelBuilder {
 	
+	enum Unit {
+		SECONDS,
+		MILLISECONDS,
+		MICROSECONDS
+	}
+	
+	val Unit resourceLoadUnits 
+	
+	new(Unit resourceLoadUnits) {
+		this.resourceLoadUnits = resourceLoadUnits
+	}
+	
 	def IModel model() {
 		new WModel
 	}
@@ -106,7 +118,7 @@ class ModelBuilder {
 	}
 	
 	def IStep step(String name, long waitTime) {
-		val step = new WStep(name, waitTime)
+		val step = new WStep(name, waitTime, scalingFactor)
 		justCreated(step)
 		step
 	}
@@ -116,15 +128,24 @@ class ModelBuilder {
 	}
 
 	def IStep step(String name, Map<IConsumable, Long> resourceNeeds) {
-		val step = new WStep(name, resourceNeeds)
+		val step = new WStep(name, resourceNeeds, scalingFactor)
 		justCreated(step)
 		step
 	}
 
 	def IStep step(String name, long waitTime, Map<IConsumable, Long> resourceNeeds) {
-		val step = new WStep(name, waitTime, resourceNeeds)
+		val step = new WStep(name, waitTime, resourceNeeds, scalingFactor)
 		justCreated(step)
 		step
+	}
+
+	def private long getScalingFactor() {
+		switch(resourceLoadUnits) {
+			case SECONDS: 1000000L
+			case MILLISECONDS: 1000L
+			case MICROSECONDS: 1L
+			default: throw new RuntimeException("Invalid scaling factor " + resourceLoadUnits)
+		}
 	}
 
 	def protected void justCreated(IStep step) { }

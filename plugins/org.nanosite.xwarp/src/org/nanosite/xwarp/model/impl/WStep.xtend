@@ -26,20 +26,37 @@ class WStep extends WNamedElement implements IStep {
 	List<IStepSuccessor> successors = newArrayList
 	List<IStep> predecessors = newArrayList
 
-	new(String name, long waitTime) {
-		this(name, waitTime, null)
+	new(String name, long waitTime, long scalingFactor) {
+		this(name, waitTime, null, scalingFactor)
 	}
 
-	new(String name, Map<IConsumable, Long> resourceNeeds) {
-		this(name, 0L, resourceNeeds)
+	new(String name, Map<IConsumable, Long> resourceNeeds, long scalingFactor) {
+		this(name, 0L, resourceNeeds, scalingFactor)
 	}
-	
-	new(String name, long waitTime, Map<IConsumable, Long> resourceNeeds) {
+
+	/**
+	 * The wait time and the resource needs of the step can be specified
+	 * using a scaling factor:
+	 * <ul>
+	 *   <li>if the values are in microseconds, use scaling factor of 1</li>
+	 *   <li>if the values are in milliseconds, use scaling factor of 1,000</li>
+	 *   <li>if the values are in seconds, use scaling factor of 1,000,000</li>
+	 * </ul>
+	 * </p>
+	 * 
+	 * For pool-type resources, no scaling will be applied.</p>
+	 * 
+	 * @parameter scalingFactor factor for scaling the resource loads
+	 */	
+	new(String name, long waitTime, Map<IConsumable, Long> resourceNeeds, long scalingFactor) {
 		super(name)
 
 		// add wait request, if any
 		if (waitTime>0L) {
-			this.scheduledNeeds.put(WUnlimitedResource.waitResource, new WAmount(waitTime))
+			this.scheduledNeeds.put(
+				WUnlimitedResource.waitResource,
+				new WAmount(waitTime*scalingFactor)
+			)
 		}
 			
 		if (resourceNeeds!==null) {
@@ -56,10 +73,10 @@ class WStep extends WNamedElement implements IStep {
 						if (! resources.containsKey(res)) {
 							resources.put(res, ArrayListMultimap.create)
 						}
-						resources.get(res).put(consumable.index, amount)
+						resources.get(res).put(consumable.index, amount*scalingFactor)
 					} else {
 						// scale needed loads and store it (this is for processors only)
-						this.scheduledNeeds.put(consumable, new WAmount(amount))
+						this.scheduledNeeds.put(consumable, new WAmount(amount*scalingFactor))
 					}
 				}
 			}

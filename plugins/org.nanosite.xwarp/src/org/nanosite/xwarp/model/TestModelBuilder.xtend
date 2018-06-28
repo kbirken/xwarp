@@ -15,6 +15,10 @@ class TestModelBuilder extends ModelBuilder {
 	Multimap<String, WStep> tobeAddedAsPrecondition = ArrayListMultimap.create
 	Multimap<String, WBehavior> tobeAddedAsUnlessCondition = ArrayListMultimap.create
 	
+	new() {
+		super(ModelBuilder.Unit.MILLISECONDS)
+	}
+	
 	override protected void justCreated(IBehavior behavior) {
 		val key = behavior.name
 		behaviors.put(key, behavior)
