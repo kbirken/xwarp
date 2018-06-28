@@ -48,7 +48,7 @@ class WSimulator implements IScheduler {
 		// iterate through time
 		var healthy = true
 		var iteration = 0
-		var nMax = 99 // 19999
+		var nMax = 1999
 		while (healthy && iteration<=nMax && (!readyList.empty || !runningList.empty)) {
 			logger.log(1,
 				ILogger.Type.INFO,
