@@ -49,9 +49,9 @@ class SimResult {
 		stepInstances
 	}
 	
-	def Iterable<StepInstance> getStepInstances(IStep step) {
+	def List<StepInstance> getStepInstances(IStep step) {
 		// TODO: introduce multimap for performance
-		stepInstances.filter[it.step==step]
+		stepInstances.filter[it.step==step].toList
 	}
 
 	def getPoolStates() {
