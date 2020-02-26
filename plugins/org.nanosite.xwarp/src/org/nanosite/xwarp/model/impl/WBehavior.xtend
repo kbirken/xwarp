@@ -15,6 +15,9 @@ class WBehavior extends WNamedElement implements IBehavior {
 	List<WStep> steps = newArrayList
 	List<IBehavior> sendTriggers = newArrayList
 	
+	// number of execution cycles needed for validating incoming messages
+	var int nRequiredCycles = 1
+	
 	WConsumer owner = null 
 	
 	new(String name, boolean addToken) {
@@ -27,6 +30,10 @@ class WBehavior extends WNamedElement implements IBehavior {
 		this.addToken = addToken
 	}
 
+	def setNRequiredCycles(int nRequiredCycles) {
+		this.nRequiredCycles = nRequiredCycles	
+	}
+	
 	def setOwner(WConsumer owner) {
 		this.owner = owner
 	}
@@ -48,6 +55,10 @@ class WBehavior extends WNamedElement implements IBehavior {
 	
 	override int getNIterations() {
 		nIterations
+	}
+	
+	override int getNRequiredCycles() {
+		nRequiredCycles
 	}
 	
 	override IStep getUnlessCondition() {

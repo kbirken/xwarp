@@ -27,6 +27,8 @@ class StepInstance {
 	}
 	
 	val Map<String, PoolState> poolStates = newHashMap
+
+	var int nMissingCycles = 0
 	
 	new(IStep step) {
 		this.step = step
@@ -53,6 +55,10 @@ class StepInstance {
 		poolStates.put(pool.name, ps)
 	}
 	
+	def void setNMissingCycles(int nMissingCycles) {
+		this.nMissingCycles = nMissingCycles
+	}
+
 	def getStep() {
 		step
 	}
@@ -98,6 +104,10 @@ class StepInstance {
 		} else {
 			ps.underflow
 		}
+	}
+	
+	def int getNMissingCycles() {
+		nMissingCycles
 	}
 	
 	def void dump() {

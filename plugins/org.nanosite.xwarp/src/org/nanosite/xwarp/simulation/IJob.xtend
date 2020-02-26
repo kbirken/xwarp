@@ -29,6 +29,8 @@ interface IJob {
 	def void traceReady(long timestamp)
 	def void traceRunning(long timestamp)
 	def void traceDone(long timestamp)
+	
+	def void traceNMissingCycles(int nMissingCycles)
 
 	def StepInstance getResult()
 	def StepInstance clearResult()

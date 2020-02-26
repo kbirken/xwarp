@@ -9,6 +9,8 @@ interface IBehavior extends IStepSuccessor, INamed {
 	def int getNIterations()
 	def IStep getUnlessCondition()
 	
+	def int getNRequiredCycles()
+		
 	def IStep getFirstStep()
 	def IStep getLastStep()
 	def boolean isLastStep(IStep step)

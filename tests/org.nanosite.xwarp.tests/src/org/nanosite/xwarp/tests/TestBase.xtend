@@ -102,4 +102,22 @@ class TestBase {
 		assertEquals(overflowExpected, si.getPoolOverflow(poolName))
 		assertEquals(underflowExpected, si.getPoolUnderflow(poolName))
 	}
+	
+	def protected checkCycles(
+		SimResult result,
+		String stepName,
+		int instance,
+		int nMissingCyclesExpected
+	) {
+		// search for part of step name only
+		val instances = result.stepInstances.filter[step.qualifiedName.contains(stepName)]
+		assertFalse("Cannot find step result for name '" + stepName + "'", instances.empty)
+
+		assertTrue("Cannot find instance " + instance + " for step for name '" + stepName + "'",
+			instance < instances.size
+		)
+		
+		val si = instances.get(instance)
+		assertEquals(nMissingCyclesExpected, si.NMissingCycles)		
+	}
 }

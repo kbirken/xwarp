@@ -19,6 +19,8 @@ class WActiveBehavior {
 	var currentUnlessCondition = false
 	var finishedOnce = false
 	
+	var iPayloadCycle = 0
+	
 	new(
 		IBehavior behavior,
 		ISimState state,
@@ -46,11 +48,23 @@ class WActiveBehavior {
 			iteration = 0
 			currentMessage = msg
 			log(2, currentMessage, "START")
-			handleTrigger(from)
+			handleTrigger(msg, from)
 		}
 	}
 	
-	def void handleTrigger(WActiveStep from) {
+	def private void handleTrigger(WMessage msg, WActiveStep from) {
+		// check if incoming message has a valid payload 
+		if (msg.isPayloadValid) {
+			// yes, increase number of valid payload cycles
+			if (iPayloadCycle < behavior.NRequiredCycles) {
+				iPayloadCycle++
+			}
+		}
+		
+		handleTriggerInternal(from)
+	}
+	
+	def private void handleTriggerInternal(WActiveStep from) {
 		val firstStep = behavior.firstStep
 		if (firstStep===null) {
 			// there are no steps in this behavior, recursively call send triggers
@@ -128,7 +142,7 @@ class WActiveBehavior {
 		// TODO: fully implement "repeat" handling based on _type
 		if (iteration < behavior.NIterations) {
 			// still iterations left, trigger myself
-			handleTrigger(from)
+			handleTriggerInternal(from)
 		} else if (behavior.unlessCondition!==null) {
 			if (! currentUnlessCondition) {
 				/*
@@ -138,7 +152,7 @@ class WActiveBehavior {
 				*/
 	
 				// unless condition still false, do another loop
-				handleTrigger(from)
+				handleTriggerInternal(from)
 			} else {
 				// unless condition is active, loop ends here
 //				eventAcceptor.signalUnless(_unless_condition, from);
@@ -160,31 +174,44 @@ class WActiveBehavior {
 				currentMessage = queue.pop
 				log(2, currentMessage, "START")
 				val simState = state.getActiveStep(behavior.lastStep, this)
-				handleTrigger(simState)
+				handleTrigger(currentMessage, simState)
 			}
 		}
 	}
 
 	def private void closeAction() {
-		log(2, currentMessage, "READY")
+		val msg = buildMessage(currentMessage.token, null)
+		log(2, msg, "READY")
 		currentMessage = null
 	}
-
+	
+	def int getNMissingCycles() {
+ 		behavior.NRequiredCycles - iPayloadCycle
+ 	}
+ 	
 	def void sendTriggers(WActiveStep from) {
 		// send triggers to successor behaviors
 		val token = currentMessage.token
 		for(triggered : behavior.sendTriggers) {
-			val msg = new WMessage(
-				if (behavior.shouldAddToken) {
-					// this behavior generates its own tokens
-					genToken(token, triggered)
-				} else
-					token
-			)
-
+			val msg = buildMessage(token, triggered)
 			val simBehavior = state.getActiveBehavior(triggered, scheduler)
 			simBehavior.receiveTrigger(from, msg)
 		}
+	}
+
+	/** Construct new message with existing token and valid-payload indicator */	
+	def WMessage buildMessage(WToken token, IBehavior triggered) {
+		val newToken =
+			if (behavior.shouldAddToken && triggered!==null) {
+				// this behavior generates its own tokens
+				genToken(token, triggered)
+			} else
+				token 
+
+		// compute valid-payload indicator
+		val isValidPayload = iPayloadCycle==behavior.NRequiredCycles
+		
+		new WMessage(newToken, isValidPayload)
 	}
 
 	def WToken genToken(WToken parent, IBehavior next) {
@@ -201,7 +228,7 @@ class WActiveBehavior {
 		logger.log(
 			level,
 			ILogger.Type.TOKEN,
-			'''«msg.name» «action» at «qualifiedName»'''
+			'''«msg.taggedName» «action» at «qualifiedName»'''
 		)
 	}
 

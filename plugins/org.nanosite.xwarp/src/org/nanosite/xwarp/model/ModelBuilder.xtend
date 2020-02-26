@@ -117,6 +117,12 @@ class ModelBuilder {
 		}
 	}
 	
+	def void setNRequiredCycles(IBehavior behavior, int nRequiredCycles) {
+		if (behavior instanceof WBehavior) {
+			behavior.setNRequiredCycles(nRequiredCycles)
+		}
+	}
+	
 	def IStep step(String name, long waitTime) {
 		val step = new WStep(name, waitTime, scalingFactor)
 		justCreated(step)

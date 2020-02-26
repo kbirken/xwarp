@@ -155,6 +155,11 @@ class WActiveStep implements IJob {
 		
 	override void traceDone(long timestamp) {
 		result.doneTime = timestamp
+		result.NMissingCycles = behavior.NMissingCycles
+	}
+		
+	override void traceNMissingCycles(int nMissingCycles) {
+		result.NMissingCycles = nMissingCycles
 	}
 		
 	override StepInstance getResult() {
