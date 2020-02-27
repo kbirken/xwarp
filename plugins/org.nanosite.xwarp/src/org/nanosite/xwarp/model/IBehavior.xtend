@@ -6,6 +6,8 @@ interface IBehavior extends IStepSuccessor, INamed {
 	def String getQualifiedName()
 	def boolean shouldAddToken()
 	
+	def WQueueConfig getQueueConfig()
+	
 	def int getNIterations()
 	def IStep getUnlessCondition()
 	
@@ -15,5 +17,5 @@ interface IBehavior extends IStepSuccessor, INamed {
 	def IStep getLastStep()
 	def boolean isLastStep(IStep step)
 
-	def List<IBehavior> getSendTriggers()
+	def List<ITrigger> getSendTriggers()
 }

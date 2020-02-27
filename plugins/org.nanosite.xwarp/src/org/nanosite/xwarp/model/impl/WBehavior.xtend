@@ -4,8 +4,12 @@ import java.util.List
 import org.nanosite.xwarp.model.IBehavior
 import org.nanosite.xwarp.model.IStep
 import com.google.common.collect.ImmutableList
+import org.nanosite.xwarp.model.WQueueConfig
+import org.nanosite.xwarp.model.ITrigger
 
 class WBehavior extends WNamedElement implements IBehavior {
+	
+	val WQueueConfig queueConfig
 	
 	val int nIterations
 	val boolean addToken
@@ -13,7 +17,7 @@ class WBehavior extends WNamedElement implements IBehavior {
 	var WStep unlessCondition = null
 	
 	List<WStep> steps = newArrayList
-	List<IBehavior> sendTriggers = newArrayList
+	List<WTrigger> sendTriggers = newArrayList
 	
 	// number of execution cycles needed for validating incoming messages
 	var int nRequiredCycles = 1
@@ -21,11 +25,25 @@ class WBehavior extends WNamedElement implements IBehavior {
 	WConsumer owner = null 
 	
 	new(String name, boolean addToken) {
-		this(name, 1, addToken)
+		this(name, WQueueConfig.STANDARD, 1, addToken)
+	}
+	
+	new(String name, WQueueConfig queueConfig, boolean addToken) {
+		this(name, queueConfig, 1, addToken)
 	}
 	
 	new(String name, int nIterations, boolean addToken) {
+		this(name, WQueueConfig.STANDARD, nIterations, addToken)
+	}
+	
+	new(
+		String name,
+		WQueueConfig queueConfig,
+		int nIterations,
+		boolean addToken
+	) {
 		super(name)
+		this.queueConfig = queueConfig
 		this.nIterations = nIterations
 		this.addToken = addToken
 	}
@@ -51,6 +69,10 @@ class WBehavior extends WNamedElement implements IBehavior {
 	
 	override boolean shouldAddToken() {
 		addToken
+	}
+	
+	override WQueueConfig getQueueConfig() {
+		queueConfig
 	}
 	
 	override int getNIterations() {
@@ -82,8 +104,8 @@ class WBehavior extends WNamedElement implements IBehavior {
 		true
 	}
 
-	def boolean addSendTrigger(IBehavior behavior) {
-		sendTriggers.add(behavior)
+	def boolean addSendTrigger(IBehavior behavior, int inputIndex) {
+		sendTriggers.add(new WTrigger(behavior, inputIndex))
 		true	
 	}
 	
@@ -105,7 +127,7 @@ class WBehavior extends WNamedElement implements IBehavior {
 		step == steps.last
 	}
 
-	override List<IBehavior> getSendTriggers() {
+	override List<ITrigger> getSendTriggers() {
 		ImmutableList.copyOf(sendTriggers)
 	}
 

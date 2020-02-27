@@ -7,6 +7,7 @@ import org.nanosite.xwarp.model.IBehavior
 import org.nanosite.xwarp.model.IConsumer
 import org.nanosite.xwarp.model.IModel
 import org.nanosite.xwarp.model.IScheduledConsumable
+import org.nanosite.xwarp.model.ITrigger
 
 class WModel implements IModel {
 
@@ -14,7 +15,7 @@ class WModel implements IModel {
 	List<IAllocatingConsumable> allocatingConsumables = newArrayList
 
 	List<WConsumer> consumers = newArrayList
-	List<WBehavior> initial = newArrayList 
+	List<WTrigger> initial = newArrayList 
 	
 	var initialized = false
 	
@@ -38,8 +39,14 @@ class WModel implements IModel {
 		true
 	}
 
+	def boolean addInitial(WTrigger trigger) {
+		initial.add(trigger)
+		true
+	}
+
+	@Deprecated
 	def boolean addInitial(WBehavior behavior) {
-		initial.add(behavior)
+		initial.add(new WTrigger(behavior, 0))
 		true
 	}
 
@@ -60,7 +67,7 @@ class WModel implements IModel {
 		ImmutableList.copyOf(allocatingConsumables)
 	}
 
-	override List<IBehavior> getInitial() {
+	override List<ITrigger> getInitial() {
 		if (! initialized)
 			finishInitialisation
 		ImmutableList.copyOf(initial)

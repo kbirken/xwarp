@@ -11,7 +11,7 @@ class TestModelBuilder extends ModelBuilder {
 	Map<String, IBehavior> behaviors = newHashMap
 	Map<String, IStep> steps = newHashMap
 
-	Multimap<String, WBehavior> tobeAddedAsSendTrigger = ArrayListMultimap.create
+	Multimap<String, Pair<WBehavior,Integer>> tobeAddedAsSendTrigger = ArrayListMultimap.create
 	Multimap<String, WStep> tobeAddedAsPrecondition = ArrayListMultimap.create
 	Multimap<String, WBehavior> tobeAddedAsUnlessCondition = ArrayListMultimap.create
 	
@@ -25,8 +25,11 @@ class TestModelBuilder extends ModelBuilder {
 		
 		// check if a trigger is waiting to be added
 		if (tobeAddedAsSendTrigger.containsKey(key)) {
-			for(sender : tobeAddedAsSendTrigger.get(key))
-				send(sender, behavior)
+			for(item : tobeAddedAsSendTrigger.get(key)) {
+				val sender = item.key
+				val inputIndex = item.value
+				send(sender, behavior, inputIndex)
+			}
 			tobeAddedAsSendTrigger.removeAll(key)
 		}
 	}
@@ -42,15 +45,19 @@ class TestModelBuilder extends ModelBuilder {
 				tobeAddedAsUnlessCondition.put(unlessConditionStep, behavior) 
 		}
 	}
-	
+
 	def send(IBehavior behavior, String triggeredBehavior) {
+		send(behavior, triggeredBehavior, 0)
+	}
+	
+	def send(IBehavior behavior, String triggeredBehavior, int inputIndex) {
 		if (behaviors.containsKey(triggeredBehavior)) {
 			// triggered behavior has already been created
-			behavior.send(behaviors.get(triggeredBehavior))
+			behavior.send(behaviors.get(triggeredBehavior), inputIndex)
 		} else {
 			// triggered behavior will be created later
 			if (behavior instanceof WBehavior)
-				tobeAddedAsSendTrigger.put(triggeredBehavior, behavior) 
+				tobeAddedAsSendTrigger.put(triggeredBehavior, new Pair(behavior, inputIndex)) 
 		}
 	}
 

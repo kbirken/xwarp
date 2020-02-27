@@ -9,6 +9,7 @@ import org.nanosite.xwarp.model.impl.WPool
 import org.nanosite.xwarp.model.impl.WProcessor
 import org.nanosite.xwarp.model.impl.WResource
 import org.nanosite.xwarp.model.impl.WStep
+import org.nanosite.xwarp.model.impl.WTrigger
 
 class ModelBuilder {
 	
@@ -41,9 +42,21 @@ class ModelBuilder {
 		}
 	}
 	
+	def ITrigger trigger(IBehavior behavior, int inputIndex) {
+		new WTrigger(behavior, inputIndex)
+	}
+
+	def void addInitial(IModel model, ITrigger... triggers) {
+		if (model instanceof WModel) {
+			val valid = triggers.filter(WTrigger)
+			valid.forEach[ model.addInitial(it) ]
+		}
+	}
+	
+	//@Deprecated
 	def void addInitial(IModel model, IBehavior... behaviors) {
 		if (model instanceof WModel) {
-			behaviors.filter(WBehavior).forEach [ model.addInitial(it) ]
+			behaviors.filter(WBehavior).forEach[ model.addInitial(it) ]
 		}
 	}
 	
@@ -76,8 +89,16 @@ class ModelBuilder {
 		}
 	}
 	
+	def WQueueConfig queueConfig(int nQueues, WQueueConfig.Strategy strategy) {
+		new WQueueConfig(nQueues, strategy)
+	}
+	
 	def IBehavior behavior(String name) {
 		behavior(name, 1, false)
+	}
+
+	def IBehavior behavior(String name, WQueueConfig queueConfig) {
+		behavior(name, queueConfig, 1, false)
 	}
 
 	def IBehavior behavior(String name, int nIterations) {
@@ -90,6 +111,17 @@ class ModelBuilder {
 		boolean shouldAddTokens
 	) {
 		val behavior = new WBehavior(name, nIterations, shouldAddTokens)
+		justCreated(behavior)
+		behavior
+	}
+
+	def IBehavior behavior(
+		String name,
+		WQueueConfig queueConfig,
+		int nIterations,
+		boolean shouldAddTokens
+	) {
+		val behavior = new WBehavior(name, queueConfig, nIterations, shouldAddTokens)
 		justCreated(behavior)
 		behavior
 	}
@@ -112,8 +144,12 @@ class ModelBuilder {
 	}
 	
 	def void send(IBehavior behavior, IBehavior triggered) {
+		send(behavior, triggered, 0)
+	}
+	
+	def void send(IBehavior behavior, IBehavior triggered, int inputIndex) {
 		if (behavior instanceof WBehavior) {
-			behavior.addSendTrigger(triggered)
+			behavior.addSendTrigger(triggered, inputIndex)
 		}
 	}
 	

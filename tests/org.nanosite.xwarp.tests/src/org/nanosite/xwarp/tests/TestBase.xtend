@@ -21,7 +21,7 @@ class TestBase {
 	protected final int MS = 1000;
 
 	def protected SimResult simulate(IModel model, int nStepsExpected, boolean dumpResult) {
-		val logger = new WLogger(1)
+		val logger = new WLogger(2)
 		val simulator = new WSimulator(logger)
 		val result = simulator.simulate(model)
 		assertNotNull("Simulation didn't finish properly", result)

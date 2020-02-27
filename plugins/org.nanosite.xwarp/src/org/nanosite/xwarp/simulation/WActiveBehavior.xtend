@@ -12,7 +12,7 @@ class WActiveBehavior {
 	val IScheduler scheduler
 	val ILogger logger
 	
-	val WMessageQueue queue = new WMessageQueue
+	val WMultiQueue queue
 	var WMessage currentMessage = null
 
 	var iteration = 0
@@ -31,24 +31,33 @@ class WActiveBehavior {
 		this.state = state
 		this.scheduler = scheduler
 		this.logger = logger
+		this.queue = new WMultiQueue(behavior.queueConfig)
 	}
 
 	def String getQualifiedName() {
 		behavior.qualifiedName
 	}
 	
-	def void receiveTrigger(WActiveStep from, WMessage msg) {
+	def void receiveTrigger(WActiveStep from, WMessage msg, int inputIndex) {
 		log(2, msg, "RECV ")
+	
+		// always queue incoming messages, the queue will decide if some work results from this
+		queue.push(inputIndex, msg)
 		
 		if (currentMessage!==null) {
-			// we are busy, just queue this message
-			queue.push(msg)
+			// we are busy, do nothing now
 		} else {
-			// set iteration count for repeat-loops
-			iteration = 0
-			currentMessage = msg
-			log(2, currentMessage, "START")
-			handleTrigger(msg, from)
+			// we are free, check if we can do more work
+			if (queue.mayPop()) {
+				val actualWork = queue.pop.merge
+				
+				// set iteration count for repeat-loops
+				iteration = 0
+				currentMessage = actualWork
+				log(2, currentMessage, "START")
+				handleTrigger(actualWork, from)
+				
+			}
 		}
 	}
 	
@@ -170,15 +179,15 @@ class WActiveBehavior {
 			closeAction()
 		
 			// check if next message is already waiting
-			if (! queue.empty) {
-				currentMessage = queue.pop
+			if (queue.mayPop) {
+				currentMessage = queue.pop.merge
 				log(2, currentMessage, "START")
 				val simState = state.getActiveStep(behavior.lastStep, this)
 				handleTrigger(currentMessage, simState)
 			}
 		}
 	}
-
+	
 	def private void closeAction() {
 		val msg = buildMessage(currentMessage.token, null)
 		log(2, msg, "READY")
@@ -192,11 +201,26 @@ class WActiveBehavior {
 	def void sendTriggers(WActiveStep from) {
 		// send triggers to successor behaviors
 		val token = currentMessage.token
-		for(triggered : behavior.sendTriggers) {
-			val msg = buildMessage(token, triggered)
-			val simBehavior = state.getActiveBehavior(triggered, scheduler)
-			simBehavior.receiveTrigger(from, msg)
+		for(trigger : behavior.sendTriggers) {
+			val msg = buildMessage(token, trigger.behavior)
+			val simBehavior = state.getActiveBehavior(trigger.behavior, scheduler)
+			simBehavior.receiveTrigger(from, msg, trigger.inputIndex)
 		}
+	}
+
+	def private WMessage merge(List<WMessage> many) {
+		if (many.size==1)
+			many.head
+		else {
+			// more than one incoming message
+			// we generate a new token
+			// and compute payloadValid as the logical conjunction of all inputs 
+			new WMessage(
+				WToken.create(behavior.qualifiedName, many.map[token], logger),
+				many.forall[it.payloadValid]
+			)
+		}
+			
 	}
 
 	/** Construct new message with existing token and valid-payload indicator */	

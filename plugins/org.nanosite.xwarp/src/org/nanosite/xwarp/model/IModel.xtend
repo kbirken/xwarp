@@ -8,5 +8,5 @@ interface IModel {
 	def List<IAllocatingConsumable> getAllocatingConsumables()
 	
 	def List<IConsumer> getConsumers()
-	def List<IBehavior> getInitial()
+	def List<ITrigger> getInitial()
 }

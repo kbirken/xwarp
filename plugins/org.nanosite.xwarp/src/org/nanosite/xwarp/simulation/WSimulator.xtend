@@ -38,11 +38,12 @@ class WSimulator implements IScheduler {
 		
 		// initialize readyList
 		readyList.clear
-		for(behavior : model.initial) {
+		for(trigger : model.initial) {
+			val behavior = trigger.behavior
 			val active = state.getActiveBehavior(behavior, this)
 			val token = WToken.create(behavior.qualifiedName, logger)
 			val msg = new WMessage(token)
-			active.receiveTrigger(null, msg)
+			active.receiveTrigger(null, msg, trigger.inputIndex)
 		}
 		
 		// iterate through time
