@@ -119,9 +119,9 @@ class WSimulator implements IScheduler {
 					)
 				}
 	
+				job.traceRunning(time)
 				if (job.hasConsumableNeeds) {
 					runningList.add(job)
-					job.traceRunning(time)
 				} else {
 					// this is a job with zero resource usage, it is already done
 					jobDone(job)

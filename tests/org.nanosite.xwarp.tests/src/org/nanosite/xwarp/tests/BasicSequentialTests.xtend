@@ -61,4 +61,34 @@ class BasicSequentialTests extends TestBase {
 		result.check("Bhvr1::S2", 2000, 2000, 5000)
 	}
 	
+	@Test
+	def void testSingleBehaviorSecondStepEmpty() {
+		// create hardware model
+		val cpu1 = processor("CPU1")
+
+		// create software model
+		val consumer1 = consumer("Comp1") => [
+			add(
+				behavior("Bhvr1") => [
+					add(
+						step("S1", #{ cpu1->2000L }),
+						step("S2", #{ })
+					)
+				]
+			)
+		]
+
+		// build model to be simulated
+		val model = model => [
+			add(cpu1)
+			add(consumer1)
+			addInitial(consumer1.behaviors.head)
+		]
+		
+		// create simulator and run simulation
+		val result = simulate(model, 2, false)
+		result.check("Bhvr1::S1", 0, 0, 2000)
+		result.check("Bhvr1::S2", 2000, 2000, 2000)
+	}
+	
 }
