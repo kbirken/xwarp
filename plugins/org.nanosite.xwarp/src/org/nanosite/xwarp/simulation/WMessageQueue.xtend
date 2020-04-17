@@ -2,19 +2,23 @@ package org.nanosite.xwarp.simulation
 
 import java.util.Queue
 
-class WMessageQueue {
+class WMessageQueue implements IQueue {
 	
 	val Queue<WMessage> queue = newLinkedList
 	
-	def isEmpty() {
+	override isEmpty() {
 		queue.empty
 	}
 	
-	def push(WMessage message) {
+	override push(WMessage message) {
 		queue.add(message)
 	}
 	
-	def pop() {
+	override pop() {
 		queue.poll
+	}
+	
+	override clear() {
+		queue.clear
 	}
 }

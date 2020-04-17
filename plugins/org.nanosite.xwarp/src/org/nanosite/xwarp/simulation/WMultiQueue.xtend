@@ -4,18 +4,26 @@ import java.util.List
 import org.nanosite.xwarp.model.WQueueConfig
 
 class WMultiQueue {
-	val List<WMessageQueue> queues = newArrayList
-	
+	val int nInstant
 	val WQueueConfig.Strategy strategy
+
+	val List<IQueue> queues = newArrayList	
 	
 	new(WQueueConfig config) {
-		for(i : 1..config.NQueues)
-			queues.add(new WMessageQueue)
+		this.nInstant = config.NInstant
 		this.strategy = config.strategy
+		
+		if (config.NInstant>0)
+			for(i : 1..config.NInstant)
+				queues.add(new WInstantQueue)
+		if (config.NQueues>0)
+			for(i : 1..config.NQueues)
+				queues.add(new WMessageQueue)
 	}
 	
 	def void push(int idx, WMessage msg) {
-		if (idx>=queues.size) {
+		flushInstants
+		if (idx >= queues.size) {
 			throw new RuntimeException(
 				"Invalid queue index " + idx + ", #queues=" + queues.size
 			)
@@ -51,6 +59,14 @@ class WMultiQueue {
 			default:
 				throw new RuntimeException("Invalid strategy")
 		}
+		
+		flushInstants
+		
 		result
+	}
+	
+	def private flushInstants() {
+		// reset all instant inputs, filter() is used instead of a cast 
+		queues.subList(0, nInstant).filter(WInstantQueue).forEach[clear]
 	}
 }

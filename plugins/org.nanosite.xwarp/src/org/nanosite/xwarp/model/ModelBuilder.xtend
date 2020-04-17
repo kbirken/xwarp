@@ -93,6 +93,10 @@ class ModelBuilder {
 		new WQueueConfig(nQueues, strategy)
 	}
 	
+	def WQueueConfig queueConfig(int nInstant, int nQueues, WQueueConfig.Strategy strategy) {
+		new WQueueConfig(nInstant, nQueues, strategy)
+	}
+	
 	def IBehavior behavior(String name) {
 		behavior(name, 1, false)
 	}
