@@ -15,6 +15,8 @@ class WSimulator implements IScheduler {
 	val ILogger logger
 	
 	var long time
+	var nMax = 1999
+	
 	val List<IJob> readyList = newArrayList
 	val List<IJob> runningList = newArrayList
 	
@@ -25,6 +27,10 @@ class WSimulator implements IScheduler {
 	new(ILogger logger) {
 		this.logger = logger
 		this.state = new WSimState(logger)
+	}
+	
+	def setNMaxIterations(int nMax) {
+		this.nMax = nMax
 	}
 	
 	def SimResult simulate(IModel model) {
@@ -49,7 +55,6 @@ class WSimulator implements IScheduler {
 		// iterate through time
 		var healthy = true
 		var iteration = 0
-		var nMax = 1999
 		while (healthy && iteration<=nMax && (!readyList.empty || !runningList.empty)) {
 			logger.log(1,
 				ILogger.Type.INFO,
