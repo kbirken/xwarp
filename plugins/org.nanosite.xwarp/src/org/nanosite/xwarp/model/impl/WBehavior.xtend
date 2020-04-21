@@ -16,7 +16,7 @@ class WBehavior extends WNamedElement implements IBehavior {
 	
 	var WStep unlessCondition = null
 	
-	List<WStep> steps = newArrayList
+	List<WAbstractStep> steps = newArrayList
 	List<WTrigger> sendTriggers = newArrayList
 	
 	// number of execution cycles needed for validating incoming messages
@@ -57,7 +57,12 @@ class WBehavior extends WNamedElement implements IBehavior {
 	}
 
 	def void finishInitialisation() {
-		steps.forEach[finishInitialisation]
+		// if this behavior doesn't contain any steps, add a dummy step to simplify handling later
+		if (steps.empty)
+			addStep(new WDummyStep)
+			
+		// finish initialisation for all steps of this behavior
+		steps.filter(WStep).forEach[it.finishInitialisation]
 	}
 	
 	override String getQualifiedName() {
@@ -96,11 +101,13 @@ class WBehavior extends WNamedElement implements IBehavior {
 		true
 	}
 	
-	def boolean addStep(WStep step) {
+	def boolean addStep(WAbstractStep step) {
 		step.owner = this
 		val previous = steps.last
 		steps.add(step)
-		previous?.addSuccessor(step)
+		
+		if (previous!==null && previous instanceof WStep)
+			(previous as WStep).addSuccessor(step)
 		true
 	}
 

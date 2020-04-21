@@ -75,33 +75,19 @@ class WActiveBehavior {
 	
 	def private void handleTriggerInternal(WActiveStep from) {
 		val firstStep = behavior.firstStep
-		if (firstStep===null) {
-			// there are no steps in this behavior, recursively call send triggers
-			val n = behavior.NIterations
-			if (behavior.unlessCondition !== null) {
-				logger.fatal("invalid behavior " + qualifiedName + ": unless-condition given, but no steps")
-			}
-			for(i : 0..n-1) {
-				sendTriggers(from)
-			}
-	
-			// prepare for next incoming message
-			closeAction()
+		val job = state.getActiveStep(firstStep, this)
+		if (job.isWaiting) {
+			// this step is waiting for preconditions and will be started later
+			scheduler.createWaitingJob(job)
+//			if (! (_type==LOOP_TYPE_UNLESS && _iteration>0)) {
+//				eventAcceptor.signalSend(from, first, false);
+//			}
 		} else {
-			val job = state.getActiveStep(firstStep, this)
-			if (job.isWaiting) {
-				// this step is waiting for preconditions and will be started later
-				scheduler.createWaitingJob(job)
-//				if (! (_type==LOOP_TYPE_UNLESS && _iteration>0)) {
-//					eventAcceptor.signalSend(from, first, false);
-//				}
-			} else {
-				// immediately provide first step to scheduler
-				scheduler.activateJob(job)
-//				if (! (_type==LOOP_TYPE_UNLESS && _iteration>0)) {
-//					eventAcceptor.signalSend(from, first, !firstStep.waiting);
-//				}
-			}
+			// immediately provide first step to scheduler
+			scheduler.activateJob(job)
+//			if (! (_type==LOOP_TYPE_UNLESS && _iteration>0)) {
+//				eventAcceptor.signalSend(from, first, !firstStep.waiting);
+//			}
 		}
 	}
 

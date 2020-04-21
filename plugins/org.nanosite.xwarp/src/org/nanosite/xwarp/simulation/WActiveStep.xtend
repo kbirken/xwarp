@@ -51,7 +51,10 @@ class WActiveStep implements IJob {
 	}
 
 	override String getQualifiedName() {
-		step.qualifiedName
+		if (step.shouldLog)
+			step.qualifiedName
+		else
+			step.owner.qualifiedName
 	}
 
 	override boolean isWaiting() {
@@ -170,6 +173,10 @@ class WActiveStep implements IJob {
 		val previous = result
 		result = new StepInstance(step)
 		previous
+	}
+
+	override shouldLog() {
+		step.shouldLog
 	}
 
 	override String toString() {

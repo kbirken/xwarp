@@ -353,12 +353,14 @@ class WSimulator implements IScheduler {
 	}
 
 	override void createWaitingJob(IJob job) {
-		log(1, ILogger.Type.WAITING, job.qualifiedName)
+		if (job.shouldLog)
+			log(1, ILogger.Type.WAITING, job.qualifiedName)
 		job.traceWaiting(time)
 	}
 
 	override void activateJob(IJob job) {
-		log(1, ILogger.Type.READY, job.qualifiedName)
+		if (job.shouldLog)
+			log(1, ILogger.Type.READY, job.qualifiedName)
 		readyList.add(job)
 		job.traceReady(time)
 	}
@@ -368,10 +370,14 @@ class WSimulator implements IScheduler {
 
 		// collect simulation result data from job and add it to overall simulation result
 		val stepInstance = job.clearResult
-		result.addInstance(stepInstance)
+		if (stepInstance!==null && job.shouldLog) {
+			result.addInstance(stepInstance)
+		}
 
 		job.exitActions()
-		log(1, ILogger.Type.DONE, job.qualifiedName)
+		
+		if (job.shouldLog)
+			log(1, ILogger.Type.DONE, job.qualifiedName)
 //		drawNode(step);
 //		_doneMap[step] = _time;
 	}

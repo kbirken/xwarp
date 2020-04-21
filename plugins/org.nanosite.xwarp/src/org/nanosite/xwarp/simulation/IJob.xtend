@@ -32,6 +32,8 @@ interface IJob {
 	
 	def void traceNMissingCycles(int nMissingCycles)
 
+	def boolean shouldLog()
+	
 	def StepInstance getResult()
 	def StepInstance clearResult()
 }

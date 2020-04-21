@@ -42,7 +42,8 @@ interface IStep extends IStepSuccessor, INamed {
 	def long getResourcePenalty(IResource resource)
 
 	def Map<IPool, Long> getPoolNeeds()
-	
 
-	def boolean hasSameBehavior(IStep other)	
+	def boolean hasSameBehavior(IStep other)
+	
+	def boolean shouldLog()	
 }

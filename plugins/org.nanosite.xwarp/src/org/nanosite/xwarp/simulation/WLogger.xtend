@@ -29,6 +29,10 @@ class WLogger implements ILogger {
 //		}
 //	}
 	
+	override void error(String txt) {
+		println('''«time()» «"ERROR".format»«txt»''')
+	}
+	
 	override void fatal(String txt) {
 		println('''«time()» «"FATAL".format»«txt»''')
 	}

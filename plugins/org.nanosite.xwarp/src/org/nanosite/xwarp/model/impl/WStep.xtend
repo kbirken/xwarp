@@ -5,7 +5,6 @@ import com.google.common.collect.ImmutableList
 import com.google.common.collect.Multimap
 import java.util.List
 import java.util.Map
-import org.nanosite.xwarp.model.IBehavior
 import org.nanosite.xwarp.model.IConsumable
 import org.nanosite.xwarp.model.IConsumableAmount
 import org.nanosite.xwarp.model.IPool
@@ -14,14 +13,12 @@ import org.nanosite.xwarp.model.IScheduledConsumable
 import org.nanosite.xwarp.model.IStep
 import org.nanosite.xwarp.model.IStepSuccessor
 
-class WStep extends WNamedElement implements IStep {
+class WStep extends WAbstractStep {
 	
 	val Map<IScheduledConsumable, WAmount> scheduledNeeds = newHashMap
 	val Map<IPool, Long> poolNeeds = newHashMap
 
 	val Map<IResource, Long> averageCSTs = newHashMap
-	
-	WBehavior owner = null 
 	
 	List<IStepSuccessor> successors = newArrayList
 	List<IStep> predecessors = newArrayList
@@ -124,22 +121,6 @@ class WStep extends WNamedElement implements IStep {
 		ImmutableList.copyOf(predecessors)
 	}
 	
-	def setOwner(WBehavior owner) {
-		this.owner = owner
-	}
-
-	override String getQualifiedName() {
-		'''«owner.qualifiedName»::«name»'''
-	}
-	
-	override IBehavior getOwner() {
-		owner
-	}
-
-	override boolean isFirst() {
-		owner.firstStep == this
-	}
-
 	override boolean hasNonPoolNeeds() {
 		!scheduledNeeds.empty
 	}
@@ -160,14 +141,11 @@ class WStep extends WNamedElement implements IStep {
 		poolNeeds
 	}
 	
-	override boolean hasSameBehavior(IStep other) {
-		if (other instanceof WStep)
-			this.owner == other.owner
-		else
-			false
+	override shouldLog() {
+		true
 	}
-	
+
 	override String toString() {
 		'''WStep(«if (owner!==null) qualifiedName else name»)'''
-	}
+	}	
 }
