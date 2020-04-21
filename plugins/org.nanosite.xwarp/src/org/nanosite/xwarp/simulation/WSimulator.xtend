@@ -9,6 +9,7 @@ import org.nanosite.xwarp.model.IScheduledConsumable
 import org.nanosite.xwarp.model.impl.WUnlimitedResource
 import org.nanosite.xwarp.result.IterationResult
 import org.nanosite.xwarp.result.SimResult
+import java.util.Set
 
 class WSimulator implements IScheduler {
 
@@ -101,14 +102,28 @@ class WSimulator implements IScheduler {
 		int nIteration
 	) {
 		// transfer ready steps to running (this might lead to new ready steps in between)
+		val Set<IJob> visited = newHashSet
 		while (!readyList.empty) {
+			// if the same job shows up in the ready list twice in the same iteration, 
+			// this is a cycle without progress. We have to kill it in order to avoid an endless loop.
+			val cyclic = Sets.intersection(visited, readyList.toSet)
+			for(job : cyclic) {
+				logger.error(
+					'''cyclic dependency in current iteration, killed «job.qualifiedName»'''
+				)
+			}
+			readyList.removeAll(cyclic)
+			
 			// copy ready list because loop might insert new jobs
 			val todo = readyList.clone
 			readyList.clear
 	
 			// handle current set of ready steps
 			for (job : todo) {
-				log(1, ILogger.Type.RUNNING, job.qualifiedName)
+				visited.add(job)
+				
+				if (job.shouldLog)
+					log(1, ILogger.Type.RUNNING, job.qualifiedName)
 				//_runningMap[step] = _time;
 	
 				// alloc/free pool resources of this step
@@ -117,11 +132,12 @@ class WSimulator implements IScheduler {
 					poolState.handleRequest(pn.value)
 
 					// record current state of this pool as a result
-					job.result.addPoolState(pn.key,
-						poolState.allocated,
-						poolState.NOverflows>0,
-						poolState.NUnderflows>0
-					)
+					if (job.result!==null)
+						job.result.addPoolState(pn.key,
+							poolState.allocated,
+							poolState.NOverflows>0,
+							poolState.NUnderflows>0
+						)
 				}
 	
 				job.traceRunning(time)
