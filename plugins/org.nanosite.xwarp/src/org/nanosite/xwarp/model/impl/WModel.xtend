@@ -3,7 +3,6 @@ package org.nanosite.xwarp.model.impl
 import com.google.common.collect.ImmutableList
 import java.util.List
 import org.nanosite.xwarp.model.IAllocatingConsumable
-import org.nanosite.xwarp.model.IBehavior
 import org.nanosite.xwarp.model.IConsumer
 import org.nanosite.xwarp.model.IModel
 import org.nanosite.xwarp.model.IScheduledConsumable
