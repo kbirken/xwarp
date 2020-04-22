@@ -5,6 +5,7 @@ import org.nanosite.xwarp.model.IConsumableAmount
 import org.nanosite.xwarp.model.IPool
 import org.nanosite.xwarp.model.IResource
 import org.nanosite.xwarp.model.IScheduledConsumable
+import org.nanosite.xwarp.result.IResultRecorder
 import org.nanosite.xwarp.result.StepInstance
 
 interface IJob {
@@ -23,7 +24,8 @@ interface IJob {
 	
 	def boolean isDone()
 	
-	def void exitActions()
+	def void exitActions(IResultRecorder recorder)
+	def void notifyKilled()
 	
 	def void traceWaiting(long timestamp)
 	def void traceReady(long timestamp)
@@ -35,5 +37,4 @@ interface IJob {
 	def boolean shouldLog()
 	
 	def StepInstance getResult()
-	def StepInstance clearResult()
 }

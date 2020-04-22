@@ -6,10 +6,11 @@ import org.nanosite.xwarp.model.IPool
 import org.nanosite.xwarp.model.IStep
 import org.nanosite.xwarp.simulation.WPoolState
 
-class SimResult {
+class SimResult implements IResultRecorder {
 
 	List<IterationResult> iterations = newArrayList
 
+	List<BehaviorInstance> behaviorInstances = newArrayList
 	List<StepInstance> stepInstances = newArrayList
 	List<WPoolState> poolStates = newArrayList
 
@@ -17,6 +18,7 @@ class SimResult {
 		
 	def clear() {
 		iterations.clear
+		behaviorInstances.clear
 		stepInstances.clear
 		poolStates.clear
 	}
@@ -25,7 +27,11 @@ class SimResult {
 		iterations.add(iteration)
 	}
 	
-	def addInstance(StepInstance si) {
+	override addBehaviorResult(BehaviorInstance bi) {
+		behaviorInstances.add(bi)
+	}
+
+	override addStepResult(StepInstance si) {
 		stepInstances.add(si)
 	}
 
@@ -43,6 +49,14 @@ class SimResult {
 	
 	def getIterations() {
 		iterations
+	}
+	
+	def getBehaviorInstances() {
+		behaviorInstances
+	}
+	
+	def getKilledBehaviorInstances() {
+		behaviorInstances.filter[wasKilled]
 	}
 	
 	def getStepInstances() {
@@ -72,7 +86,11 @@ class SimResult {
 		for(iter : iterations)
 			iter.dump
 			
-		println("STEP INSTANCES: ")
+		println("\nBEHAVIOR INSTANCES: ")
+		for(bi : behaviorInstances)
+			bi.dump
+
+		println("\nSTEP INSTANCES: ")
 		for(si : stepInstances)
 			si.dump
 	}

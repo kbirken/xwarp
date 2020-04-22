@@ -47,7 +47,7 @@ class WSimulator implements IScheduler {
 		readyList.clear
 		for(trigger : model.initial) {
 			val behavior = trigger.behavior
-			val active = state.getActiveBehavior(behavior, this)
+			val active = state.getActiveBehavior(behavior, this, result)
 			val token = WToken.create(behavior.qualifiedName, logger)
 			val msg = new WMessage(token)
 			active.receiveTrigger(null, msg, trigger.inputIndex)
@@ -111,6 +111,7 @@ class WSimulator implements IScheduler {
 				logger.error(
 					'''cyclic dependency in current iteration, killed «job.qualifiedName»'''
 				)
+				job.notifyKilled
 			}
 			readyList.removeAll(cyclic)
 			
@@ -380,17 +381,14 @@ class WSimulator implements IScheduler {
 		readyList.add(job)
 		job.traceReady(time)
 	}
-
+	
+	override long getCurrentTime() {
+		time
+	}
+	
 	def private void jobDone(IJob job) {
 		job.traceDone(time)
-
-		// collect simulation result data from job and add it to overall simulation result
-		val stepInstance = job.clearResult
-		if (stepInstance!==null && job.shouldLog) {
-			result.addInstance(stepInstance)
-		}
-
-		job.exitActions()
+		job.exitActions(result)
 		
 		if (job.shouldLog)
 			log(1, ILogger.Type.DONE, job.qualifiedName)

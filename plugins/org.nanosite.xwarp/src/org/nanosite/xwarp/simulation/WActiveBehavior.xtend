@@ -4,6 +4,8 @@ import java.util.List
 import org.nanosite.xwarp.model.IBehavior
 import org.nanosite.xwarp.model.IStep
 import org.nanosite.xwarp.model.IStepSuccessor
+import org.nanosite.xwarp.result.BehaviorInstance
+import org.nanosite.xwarp.result.IResultRecorder
 
 class WActiveBehavior {
 
@@ -11,6 +13,7 @@ class WActiveBehavior {
 	val ISimState state 
 	val IScheduler scheduler
 	val ILogger logger
+	val IResultRecorder recorder
 	
 	val WMultiQueue queue
 	var WMessage currentMessage = null
@@ -21,17 +24,23 @@ class WActiveBehavior {
 	
 	var iPayloadCycle = 0
 	
+	var BehaviorInstance result
+	
 	new(
 		IBehavior behavior,
 		ISimState state,
 		IScheduler scheduler,
-		ILogger logger
+		ILogger logger,
+		IResultRecorder recorder
 	) {
 		this.behavior = behavior
 		this.state = state
 		this.scheduler = scheduler
 		this.logger = logger
+		this.recorder = recorder
 		this.queue = new WMultiQueue(behavior.queueConfig)
+		
+		this.result = new BehaviorInstance(behavior)
 	}
 
 	def String getQualifiedName() {
@@ -70,6 +79,8 @@ class WActiveBehavior {
 			}
 		}
 		
+		result.startedTime = scheduler.currentTime
+		
 		handleTriggerInternal(from)
 	}
 	
@@ -95,16 +106,16 @@ class WActiveBehavior {
 	def boolean isRunning() {
 		currentMessage!==null
 	}
-
+	
 	def void exitActionsForStep(WActiveStep step, List<IStepSuccessor> successors) {
 		// all has been consumed => tell successors that we are ready
 		for(succ : successors) {
 			if (succ instanceof IStep) {
-				val simBehavior = state.getActiveBehavior(succ.owner, scheduler)
+				val simBehavior = state.getActiveBehavior(succ.owner, scheduler, recorder)
 				val simStep = state.getActiveStep(succ, simBehavior)
 				simStep.triggerWaiting(step, scheduler)
 			} else if (succ instanceof IBehavior) {
-				val simBehavior = state.getActiveBehavior(succ, scheduler)
+				val simBehavior = state.getActiveBehavior(succ, scheduler, recorder)
 				simBehavior.done
 			}
 		}
@@ -113,6 +124,14 @@ class WActiveBehavior {
 		if (behavior.isLastStep(step.step)) {
 			lastStepDone(step)
 		}
+	}
+
+	def void notifyKilled(WActiveStep step) {
+		result.killedTime = scheduler.currentTime
+		closeAction()
+		
+		// TODO: we could add checking the queue here and ensure that the behavior will
+		// execute again if necessary. Without this it will be triggered on the next incoming message only.
 	}
 
 	// this is called to set 'unless' conditions
@@ -159,9 +178,9 @@ class WActiveBehavior {
 //				// NIY
 //				logger.fatal("invalid behavior %s - type %d not yet implemented\n", getQualifiedName().c_str(), _type);
 //				break;
-	
+			
 			// prepare for next incoming message
-			iteration = 0
+			result.readyTime = scheduler.currentTime
 			closeAction()
 		
 			// check if next message is already waiting
@@ -175,6 +194,10 @@ class WActiveBehavior {
 	}
 	
 	def private void closeAction() {
+		recordResult()
+
+		iteration = 0
+		
 		val msg = buildMessage(currentMessage.token, null)
 		log(2, msg, "READY")
 		currentMessage = null
@@ -189,7 +212,7 @@ class WActiveBehavior {
 		val token = currentMessage.token
 		for(trigger : behavior.sendTriggers) {
 			val msg = buildMessage(token, trigger.behavior)
-			val simBehavior = state.getActiveBehavior(trigger.behavior, scheduler)
+			val simBehavior = state.getActiveBehavior(trigger.behavior, scheduler, recorder)
 			simBehavior.receiveTrigger(from, msg, trigger.inputIndex)
 		}
 	}
@@ -232,6 +255,12 @@ class WActiveBehavior {
 
 	def boolean hasFinishedOnce() {
 		finishedOnce
+	}
+	
+	def private void recordResult() {
+		// record result of the execution of this behavior instance
+		recorder.addBehaviorResult(result)
+		result = new BehaviorInstance(behavior)
 	}
 	
 	def private void log(int level, WMessage msg, String action) {

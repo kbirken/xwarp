@@ -5,7 +5,14 @@ import java.util.Map
 import org.nanosite.xwarp.model.IBehavior
 import org.nanosite.xwarp.model.IPool
 import org.nanosite.xwarp.model.IStep
+import org.nanosite.xwarp.result.IResultRecorder
 
+/***
+ * Representation of the current simulation state.</p>
+ * 
+ * It maintains a mapping of model elements (e.g., behaviors, steps, pools)
+ * to their active counterparts in the simulation engine.</p> 
+ */
 class WSimState implements ISimState {
 
 	val ILogger logger
@@ -30,11 +37,11 @@ class WSimState implements ISimState {
 		poolStates.values
 	}
 
-	override getActiveBehavior(IBehavior behavior, IScheduler scheduler) {
+	override getActiveBehavior(IBehavior behavior, IScheduler scheduler, IResultRecorder recorder) {
 		if (activeBehaviors.containsKey(behavior)) {
 			activeBehaviors.get(behavior)
 		} else {
-			val activeBehavior = new WActiveBehavior(behavior, this, scheduler, logger)
+			val activeBehavior = new WActiveBehavior(behavior, this, scheduler, logger, recorder)
 			activeBehaviors.put(behavior, activeBehavior)
 			activeBehavior
 		}

@@ -2,6 +2,8 @@ package org.nanosite.xwarp.tests
 
 import org.junit.Test
 
+import static org.junit.Assert.assertEquals
+
 class InfiniteLoopTests extends TestBase {
 
 	@Test
@@ -20,9 +22,6 @@ class InfiniteLoopTests extends TestBase {
 					add(step("S1", 30L))
 					send("Bhvr1")
 				]
-				, behavior("LOOPER") => [
-					send("LOOPER")
-				]
 			)
 		]
 
@@ -30,7 +29,7 @@ class InfiniteLoopTests extends TestBase {
 		val model = model => [
 			add(cpu1)
 			add(consumer1)
-			addInitial(consumer1.behaviors.head, consumer1.behaviors.get(2))
+			addInitial(consumer1.behaviors.head)
 		]
 		
 		// create simulator and run simulation
@@ -65,10 +64,9 @@ class InfiniteLoopTests extends TestBase {
 		]
 		
 		// create simulator and run simulation
-		val result = simulate(model, 2, false)
+		val result = simulate(model, 2, 1, false)
 		result.check("Bhvr1::S1", 0, 0, 0)
 		result.check("Bhvr2::S1", 0, 0, 0)
-		// TODO: add check for cycle-ERROR here!
 	}
 
 	@Test
@@ -96,8 +94,7 @@ class InfiniteLoopTests extends TestBase {
 		]
 		
 		// create simulator and run simulation
-		val result = simulate(model, 0, false)
-		// TODO: add check for cycle-ERROR here!
+		val result = simulate(model, 0, 1, false)
 	}
 
 }

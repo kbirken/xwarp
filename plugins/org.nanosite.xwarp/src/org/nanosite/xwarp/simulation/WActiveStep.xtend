@@ -7,6 +7,7 @@ import org.nanosite.xwarp.model.IPool
 import org.nanosite.xwarp.model.IResource
 import org.nanosite.xwarp.model.IScheduledConsumable
 import org.nanosite.xwarp.model.IStep
+import org.nanosite.xwarp.result.IResultRecorder
 import org.nanosite.xwarp.result.StepInstance
 
 class WActiveStep implements IJob {
@@ -105,11 +106,24 @@ class WActiveStep implements IJob {
 		currentNonPoolNeeds.empty
 	}
 	
+	override void exitActions(IResultRecorder recorder) {
+		// record result of the execution of this step instance
+		if (result!==null && shouldLog) {
+			recorder.addStepResult(result)
+		}
+		result = new StepInstance(step)
 
-	override void exitActions() {
 		behavior.exitActionsForStep(this, step.successors)
 		
 		// prepare next execution
+		init(false)
+	}
+	
+	override void notifyKilled() {
+		behavior.notifyKilled(this)		
+		
+		// prepare next execution
+		result = new StepInstance(step)
 		init(false)
 	}
 
@@ -169,12 +183,6 @@ class WActiveStep implements IJob {
 		result
 	}
 	
-	override StepInstance clearResult() {
-		val previous = result
-		result = new StepInstance(step)
-		previous
-	}
-
 	override shouldLog() {
 		step.shouldLog
 	}
