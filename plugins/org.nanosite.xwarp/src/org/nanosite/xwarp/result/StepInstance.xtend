@@ -16,7 +16,31 @@ class StepInstance {
 	var long tRunning = 0L
 	var long tDone = 0L
 	
-	val List<StepInstance> predecessors = newArrayList
+	static public class Predecessor {
+		public enum Type {
+			// sequential execution of steps in a behavior
+			SEQUENTIAL,
+			
+			// next loop iteration
+			LOOP,
+
+			// one behavior triggers another
+			TRIGGER,
+
+			// repeating a behavior stops because of an unless condition 
+			// (this is not actually a linear dependency)
+			UNLESS_CONDITION
+		}
+		val public StepInstance stepInstance
+		val public Type type
+		
+		new(StepInstance stepInstance, Type type) {
+			this.stepInstance = stepInstance
+			this.type = type
+		}
+	}
+	
+	val List<Predecessor> predecessors = newArrayList
 	
 	static private class PoolState {
 		val public long amount
@@ -54,8 +78,8 @@ class StepInstance {
 		this.tDone = WIntAccuracy.toPrint(timestamp)
 	}
 	
-	def addPredecessor(StepInstance pred) {
-		predecessors.add(pred)
+	def addPredecessor(StepInstance pred, Predecessor.Type type) {
+		predecessors.add(new Predecessor(pred, type))
 	}
 	
 	def void addPoolState(IPool pool, long amount, boolean overflow, boolean underflow) {
@@ -87,7 +111,7 @@ class StepInstance {
 		tDone
 	}
 	
-	def Collection<StepInstance> getPredecessors() {
+	def Collection<Predecessor> getPredecessors() {
 		predecessors
 	}
 	

@@ -8,6 +8,7 @@ import org.nanosite.xwarp.model.IStepSuccessor
 import org.nanosite.xwarp.result.BehaviorInstance
 import org.nanosite.xwarp.result.IResultRecorder
 import org.nanosite.xwarp.result.StepInstance
+import org.nanosite.xwarp.result.StepInstance.Predecessor
 
 class WActiveBehavior {
 
@@ -83,18 +84,14 @@ class WActiveBehavior {
 		if (job.isWaiting) {
 			// this step is waiting for preconditions and will be started later
 			scheduler.createWaitingJob(job)
-//			if (! (_type==LOOP_TYPE_UNLESS && _iteration>0)) {
-//				eventAcceptor.signalSend(from, first, false);
-				job.tracePredecessors(from)
-//			}
 		} else {
 			// immediately provide first step to scheduler
 			scheduler.activateJob(job)
-//			if (! (_type==LOOP_TYPE_UNLESS && _iteration>0)) {
-//				eventAcceptor.signalSend(from, first, !firstStep.waiting);
-				job.tracePredecessors(from)
-//			}
 		}
+		job.tracePredecessors(
+			from,
+			if (iteration>0) Predecessor.Type.LOOP else Predecessor.Type.TRIGGER
+		)
 	}
 
 	// this will be called by the behavior's first step (if waiting for preconditions is over)
@@ -165,9 +162,10 @@ class WActiveBehavior {
 				handleTriggerInternal(predecessors)
 			} else {
 				// unless condition is active, loop ends here
-//				eventAcceptor.signalUnless(_unless_condition, from);
-				// TODO: add some flag to indicate that this is not a causal-predecessor, but an "inhibitor" 
-				from.previousResult.addPredecessor(currentUnlessCondition.previousResult)
+				from.previousResult.addPredecessor(
+					currentUnlessCondition.previousResult,
+					Predecessor.Type.UNLESS_CONDITION
+				)
 			}
 		} else {
 			// last iteration

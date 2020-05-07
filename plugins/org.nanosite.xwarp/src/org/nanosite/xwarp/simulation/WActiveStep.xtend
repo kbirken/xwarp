@@ -10,6 +10,7 @@ import org.nanosite.xwarp.model.IScheduledConsumable
 import org.nanosite.xwarp.model.IStep
 import org.nanosite.xwarp.result.IResultRecorder
 import org.nanosite.xwarp.result.StepInstance
+import org.nanosite.xwarp.result.StepInstance.Predecessor
 
 class WActiveStep implements IJob {
 
@@ -162,7 +163,7 @@ class WActiveStep implements IJob {
 		
 		// record dependency on StepInstance level
 //		eventAcceptor.signalReady(step, this, runNow);
-		tracePredecessor(from.previousResult)
+		tracePredecessor(from.previousResult, Predecessor.Type.SEQUENTIAL)
 	}
 
 	override void traceWaiting(long timestamp) {
@@ -186,19 +187,22 @@ class WActiveStep implements IJob {
 		result.NMissingCycles = nMissingCycles
 	}
 	
-	def void tracePredecessor(StepInstance predecessor) {
-		if (predecessor!=null)
-			tracePredecessors(newArrayList(predecessor))
+	def void tracePredecessor(StepInstance predecessor, Predecessor.Type type) {
+		if (predecessor!==null)
+			tracePredecessors(newArrayList(predecessor), type)
 	}
 	
-	def void tracePredecessors(Collection<StepInstance> predecessors) {
-		if (predecessors == null || predecessors.empty) {
+	def void tracePredecessors(
+		Collection<StepInstance> predecessors,
+		Predecessor.Type type
+	) {
+		if (predecessors === null || predecessors.empty) {
 			// this is an initial trigger
 			// TODO: handle this
 		} else {
 			predecessors.filterNull.forEach[
 				//println("WActiveStep " + this.qualifiedName + ": add predecessor " + it.toString)
-				this.result.addPredecessor(it)
+				this.result.addPredecessor(it, type)
 			]
 		}
 	}
