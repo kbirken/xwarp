@@ -1,5 +1,6 @@
 package org.nanosite.xwarp.simulation
 
+import java.util.Collection
 import java.util.List
 import java.util.Map
 import org.nanosite.xwarp.model.IConsumableAmount
@@ -21,6 +22,7 @@ class WActiveStep implements IJob {
 	Map<IScheduledConsumable, IConsumableAmount> currentNonPoolNeeds = newHashMap
 
 	var StepInstance result
+	var StepInstance prevResult = null
 	
 	new(IStep step, WActiveBehavior behavior) {
 		this.step = step
@@ -110,9 +112,10 @@ class WActiveStep implements IJob {
 		// record result of the execution of this step instance
 		if (result!==null && shouldLog) {
 			recorder.addStepResult(result)
+			prevResult = result
 		}
 		result = new StepInstance(step)
-
+		
 		behavior.exitActionsForStep(this, step.successors)
 		
 		// prepare next execution
@@ -138,6 +141,7 @@ class WActiveStep implements IJob {
 		}
 
 		// we are no more waiting for the notifying step (because it is done)
+		// TODO: check if we can/should merge the arguments "from" and "predecessors"
 		waitingFor.remove(from.step)
 
 		if (waitingFor.empty) {
@@ -155,7 +159,10 @@ class WActiveStep implements IJob {
 		} else {
 			scheduler.createWaitingJob(this)
 		}
+		
+		// record dependency on StepInstance level
 //		eventAcceptor.signalReady(step, this, runNow);
+		tracePredecessor(from.previousResult)
 	}
 
 	override void traceWaiting(long timestamp) {
@@ -178,9 +185,30 @@ class WActiveStep implements IJob {
 	override void traceNMissingCycles(int nMissingCycles) {
 		result.NMissingCycles = nMissingCycles
 	}
+	
+	def void tracePredecessor(StepInstance predecessor) {
+		if (predecessor!=null)
+			tracePredecessors(newArrayList(predecessor))
+	}
+	
+	def void tracePredecessors(Collection<StepInstance> predecessors) {
+		if (predecessors == null || predecessors.empty) {
+			// this is an initial trigger
+			// TODO: handle this
+		} else {
+			predecessors.filterNull.forEach[
+				//println("WActiveStep " + this.qualifiedName + ": add predecessor " + it.toString)
+				this.result.addPredecessor(it)
+			]
+		}
+	}
 		
 	override StepInstance getResult() {
 		result
+	}
+	
+	def StepInstance getPreviousResult() {
+		prevResult
 	}
 	
 	override shouldLog() {

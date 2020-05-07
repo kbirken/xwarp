@@ -3,13 +3,14 @@ package org.nanosite.xwarp.simulation
 import com.google.common.collect.Sets
 import java.util.List
 import java.util.Map
+import java.util.Set
 import org.nanosite.xwarp.model.IAllocatingConsumable
 import org.nanosite.xwarp.model.IModel
 import org.nanosite.xwarp.model.IScheduledConsumable
 import org.nanosite.xwarp.model.impl.WUnlimitedResource
 import org.nanosite.xwarp.result.IterationResult
 import org.nanosite.xwarp.result.SimResult
-import java.util.Set
+import org.nanosite.xwarp.result.StepInstance
 
 class WSimulator implements IScheduler {
 
@@ -49,8 +50,8 @@ class WSimulator implements IScheduler {
 			val behavior = trigger.behavior
 			val active = state.getActiveBehavior(behavior, this, result)
 			val token = WToken.create(behavior.qualifiedName, logger)
-			val msg = new WMessage(token)
-			active.receiveTrigger(null, msg, trigger.inputIndex)
+			val msg = new WMessage(token, null)
+			active.receiveTrigger(msg, trigger.inputIndex)
 		}
 		
 		// iterate through time

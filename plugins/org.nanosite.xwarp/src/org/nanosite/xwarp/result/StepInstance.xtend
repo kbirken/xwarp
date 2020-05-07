@@ -1,5 +1,7 @@
 package org.nanosite.xwarp.result
 
+import java.util.Collection
+import java.util.List
 import java.util.Map
 import org.nanosite.xwarp.model.IPool
 import org.nanosite.xwarp.model.IStep
@@ -13,6 +15,8 @@ class StepInstance {
 	var long tReady = 0L
 	var long tRunning = 0L
 	var long tDone = 0L
+	
+	val List<StepInstance> predecessors = newArrayList
 	
 	static private class PoolState {
 		val public long amount
@@ -50,6 +54,10 @@ class StepInstance {
 		this.tDone = WIntAccuracy.toPrint(timestamp)
 	}
 	
+	def addPredecessor(StepInstance pred) {
+		predecessors.add(pred)
+	}
+	
 	def void addPoolState(IPool pool, long amount, boolean overflow, boolean underflow) {
 		val ps = new PoolState(amount, overflow, underflow)
 		poolStates.put(pool.name, ps)
@@ -77,6 +85,10 @@ class StepInstance {
 	
 	def getDoneTime() {
 		tDone
+	}
+	
+	def Collection<StepInstance> getPredecessors() {
+		predecessors
 	}
 	
 	def long getPoolUsage(String poolName) {
@@ -127,5 +139,9 @@ class StepInstance {
 			val ps = poolStates.get(pool)
 			println('''   pool state '«pool»': «ps.amount»«IF ps.overflow» overflow!«ENDIF»«IF ps.underflow» underflow!«ENDIF»''')
 		}
+	}
+	
+	override String toString() {
+		'''«step.qualifiedName»#«tReady»/«tRunning»/«tDone»'''
 	}
 }

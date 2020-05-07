@@ -1,11 +1,13 @@
 package org.nanosite.xwarp.simulation
 
+import java.util.Collection
 import java.util.List
 import org.nanosite.xwarp.model.IBehavior
 import org.nanosite.xwarp.model.IStep
 import org.nanosite.xwarp.model.IStepSuccessor
 import org.nanosite.xwarp.result.BehaviorInstance
 import org.nanosite.xwarp.result.IResultRecorder
+import org.nanosite.xwarp.result.StepInstance
 
 class WActiveBehavior {
 
@@ -19,7 +21,7 @@ class WActiveBehavior {
 	var WMessage currentMessage = null
 
 	var iteration = 0
-	var currentUnlessCondition = false
+	var WActiveStep currentUnlessCondition = null
 	var finishedOnce = false
 	
 	var iPayloadCycle = 0
@@ -47,7 +49,7 @@ class WActiveBehavior {
 		behavior.qualifiedName
 	}
 	
-	def void receiveTrigger(WActiveStep from, WMessage msg, int inputIndex) {
+	def void receiveTrigger(WMessage msg, int inputIndex) {
 		log(2, msg, "RECV ")
 	
 		// always queue incoming messages, the queue will decide if some work results from this
@@ -57,20 +59,11 @@ class WActiveBehavior {
 			// we are busy, do nothing now
 		} else {
 			// we are free, check if we can do more work
-			if (queue.mayPop()) {
-				val actualWork = queue.pop.merge
-				
-				// set iteration count for repeat-loops
-				iteration = 0
-				currentMessage = actualWork
-				log(2, currentMessage, "START")
-				handleTrigger(actualWork, from)
-				
-			}
+			getNextFromQueue(false)
 		}
 	}
 	
-	def private void handleTrigger(WMessage msg, WActiveStep from) {
+	def private void handleTrigger(WMessage msg, Collection<StepInstance> from) {
 		// check if incoming message has a valid payload 
 		if (msg.isPayloadValid) {
 			// yes, increase number of valid payload cycles
@@ -84,7 +77,7 @@ class WActiveBehavior {
 		handleTriggerInternal(from)
 	}
 	
-	def private void handleTriggerInternal(WActiveStep from) {
+	def private void handleTriggerInternal(Collection<StepInstance> from) {
 		val firstStep = behavior.firstStep
 		val job = state.getActiveStep(firstStep, this)
 		if (job.isWaiting) {
@@ -92,12 +85,14 @@ class WActiveBehavior {
 			scheduler.createWaitingJob(job)
 //			if (! (_type==LOOP_TYPE_UNLESS && _iteration>0)) {
 //				eventAcceptor.signalSend(from, first, false);
+				job.tracePredecessors(from)
 //			}
 		} else {
 			// immediately provide first step to scheduler
 			scheduler.activateJob(job)
 //			if (! (_type==LOOP_TYPE_UNLESS && _iteration>0)) {
 //				eventAcceptor.signalSend(from, first, !firstStep.waiting);
+				job.tracePredecessors(from)
 //			}
 		}
 	}
@@ -116,7 +111,7 @@ class WActiveBehavior {
 				simStep.triggerWaiting(step, scheduler)
 			} else if (succ instanceof IBehavior) {
 				val simBehavior = state.getActiveBehavior(succ, scheduler, recorder)
-				simBehavior.done
+				simBehavior.done(step)
 			}
 		}
 		
@@ -135,10 +130,10 @@ class WActiveBehavior {
 	}
 
 	// this is called to set 'unless' conditions
-	def private void done() {
+	def private void done(WActiveStep signalledBy) {
 		// we simply clear unless condition (forever)
 		// this will be checked before any execution of the loop
-		currentUnlessCondition = true
+		currentUnlessCondition = signalledBy
 	}
 
 	def private void lastStepDone(WActiveStep from) {
@@ -154,11 +149,12 @@ class WActiveBehavior {
 		iteration++
 	
 		// TODO: fully implement "repeat" handling based on _type
+		val predecessors = newArrayList(from.previousResult)
 		if (iteration < behavior.NIterations) {
 			// still iterations left, trigger myself
-			handleTriggerInternal(from)
+			handleTriggerInternal(predecessors)
 		} else if (behavior.unlessCondition!==null) {
-			if (! currentUnlessCondition) {
+			if (currentUnlessCondition===null) {
 				/*
 				logger.log("INFO", "still waiting for unless condition in behavior %s: %s",
 						getQualifiedName().c_str(),
@@ -166,10 +162,12 @@ class WActiveBehavior {
 				*/
 	
 				// unless condition still false, do another loop
-				handleTriggerInternal(from)
+				handleTriggerInternal(predecessors)
 			} else {
 				// unless condition is active, loop ends here
 //				eventAcceptor.signalUnless(_unless_condition, from);
+				// TODO: add some flag to indicate that this is not a causal-predecessor, but an "inhibitor" 
+				from.previousResult.addPredecessor(currentUnlessCondition.previousResult)
 			}
 		} else {
 			// last iteration
@@ -184,12 +182,30 @@ class WActiveBehavior {
 			closeAction()
 		
 			// check if next message is already waiting
-			if (queue.mayPop) {
-				currentMessage = queue.pop.merge
-				log(2, currentMessage, "START")
-				val simState = state.getActiveStep(behavior.lastStep, this)
-				handleTrigger(currentMessage, simState)
+			getNextFromQueue(true)
+		}
+	}
+	
+	def private void getNextFromQueue(boolean isFollowup) {
+		if (queue.mayPop) {
+			val msgs = queue.pop
+			currentMessage = msgs.merge
+			
+			// compute predecessors for simulation results
+			// TODO: is there a more elegant way to create an iterator as a concat of two lists?
+			val predecessors = newArrayList()
+			predecessors.addAll(msgs.map[sender])
+			if (isFollowup) {
+				val previous = state.getActiveStep(behavior.lastStep, this)
+				predecessors.add(previous.previousResult)
 			}
+							
+			// set iteration count for repeat-loops
+			iteration = 0
+
+			// execute behavior based on the message(s) from queue
+			log(2, currentMessage, "START")
+			handleTrigger(currentMessage, predecessors)
 		}
 	}
 	
@@ -198,8 +214,9 @@ class WActiveBehavior {
 
 		iteration = 0
 		
-		val msg = buildMessage(currentMessage.token, null)
-		log(2, msg, "READY")
+		// create WMessage just for reporting
+		val msg = buildMessage(currentMessage.token, null, null)
+		log(2, msg, "DONE ")
 		currentMessage = null
 	}
 	
@@ -211,9 +228,9 @@ class WActiveBehavior {
 		// send triggers to successor behaviors
 		val token = currentMessage.token
 		for(trigger : behavior.sendTriggers) {
-			val msg = buildMessage(token, trigger.behavior)
+			val msg = buildMessage(token, trigger.behavior, from.previousResult)
 			val simBehavior = state.getActiveBehavior(trigger.behavior, scheduler, recorder)
-			simBehavior.receiveTrigger(from, msg, trigger.inputIndex)
+			simBehavior.receiveTrigger(msg, trigger.inputIndex)
 		}
 	}
 
@@ -226,6 +243,7 @@ class WActiveBehavior {
 			// and compute payloadValid as the logical conjunction of all inputs 
 			new WMessage(
 				WToken.create(behavior.qualifiedName, many.map[token], logger),
+				null, // TODO: which sender should we provide here, there might be >1
 				many.forall[it.payloadValid]
 			)
 		}
@@ -233,7 +251,7 @@ class WActiveBehavior {
 	}
 
 	/** Construct new message with existing token and valid-payload indicator */	
-	def WMessage buildMessage(WToken token, IBehavior triggered) {
+	def WMessage buildMessage(WToken token, IBehavior triggered, StepInstance previous) {
 		val newToken =
 			if (behavior.shouldAddToken && triggered!==null) {
 				// this behavior generates its own tokens
@@ -244,7 +262,7 @@ class WActiveBehavior {
 		// compute valid-payload indicator
 		val isValidPayload = iPayloadCycle==behavior.NRequiredCycles
 		
-		new WMessage(newToken, isValidPayload)
+		new WMessage(newToken, previous, isValidPayload)
 	}
 
 	def WToken genToken(WToken parent, IBehavior next) {
