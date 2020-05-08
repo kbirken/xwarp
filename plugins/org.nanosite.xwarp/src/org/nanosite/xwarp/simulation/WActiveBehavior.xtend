@@ -64,6 +64,7 @@ class WActiveBehavior {
 	
 		// always queue incoming messages, the queue will decide if some work results from this
 		queue.push(inputIndex, msg)
+		println("receiveTrigger "+msg)
 		
 		if (currentMessage!==null) {
 			// we are busy, do nothing now
@@ -83,29 +84,21 @@ class WActiveBehavior {
 		if (queue.mayPop) {
 			val msgs = queue.pop
 			currentMessage = msgs.merge
-			
-			// compute predecessors for simulation results
-			// TODO: is there a more elegant way to create an iterator as a concat of two lists?
-			val predecessors = newArrayList()
-			predecessors.addAll(msgs.map[sender])
-			if (isFollowup) {
-				val previous = state.getActiveStep(behavior.lastStep, this)
-				predecessors.add(previous.previousResult)
-			}
 							
 			// set iteration count for repeat-loops
 			iteration = 0
 
 			// execute behavior based on the message(s) from queue
 			log(2, currentMessage, "START")
-			handleTrigger(currentMessage, predecessors)
+			val triggeredBy = msgs.map[sender]
+			handleTrigger(currentMessage, triggeredBy, isFollowup)
 		}
 	}
 	
 	/**
 	 * Execute the behavior based on the trigger.
 	 */
-	def private void handleTrigger(WMessage msg, Collection<StepInstance> from) {
+	def private void handleTrigger(WMessage msg, Collection<StepInstance> triggeredBy, boolean isFollowup) {
 		// check if incoming message has a valid payload 
 		if (msg.isPayloadValid) {
 			// yes, increase number of valid payload cycles
@@ -115,7 +108,7 @@ class WActiveBehavior {
 		}
 		
 		result.startedTime = scheduler.currentTime
-		execute(from)
+		execute(triggeredBy, isFollowup)
 	}
 	
 	/**
@@ -125,7 +118,7 @@ class WActiveBehavior {
 	 * it will not be activated, but put into the scheduler's wait-queue
 	 * instead.</p>
 	 */
-	def private void execute(Collection<StepInstance> from) {
+	def private void execute(Collection<StepInstance> triggeredBy, boolean isFollowup) {
 		val firstStep = behavior.firstStep
 		val job = state.getActiveStep(firstStep, this)
 		if (job.isWaiting) {
@@ -135,10 +128,17 @@ class WActiveBehavior {
 			// immediately provide first step to scheduler
 			scheduler.activateJob(job)
 		}
-		job.tracePredecessors(
-			from,
-			if (iteration>0) Predecessor.Type.LOOP else Predecessor.Type.TRIGGER
-		)
+		
+		// do tracing of predecessors of various kinds
+		if (isFollowup) {
+			val previous = state.getActiveStep(behavior.lastStep, this)
+			job.tracePredecessor(
+				previous.previousResult,
+				if (iteration>0) Predecessor.Type.LOOP else Predecessor.Type.FOLLOWUP
+			)
+		}
+		if (! triggeredBy.nullOrEmpty)
+			job.tracePredecessors(triggeredBy, Predecessor.Type.TRIGGER)
 	}
 
 	/**
@@ -224,10 +224,9 @@ class WActiveBehavior {
 		iteration++
 	
 		// TODO: fully implement "repeat" handling based on _type
-		val predecessors = newArrayList(from.previousResult)
 		if (iteration < behavior.NIterations) {
 			// still iterations left, trigger myself
-			execute(predecessors)
+			execute(null, true)
 		} else if (behavior.unlessCondition!==null) {
 			if (currentUnlessCondition===null) {
 				/*
@@ -237,10 +236,10 @@ class WActiveBehavior {
 				*/
 	
 				// unless condition still false, do another loop
-				execute(predecessors)
+				execute(null, true)
 			} else {
 				// unless condition is active, loop ends here
-				from.previousResult.addPredecessor(
+				from.tracePredecessor(
 					currentUnlessCondition.previousResult,
 					Predecessor.Type.UNLESS_CONDITION
 				)
@@ -327,6 +326,15 @@ class WActiveBehavior {
 		// record result of the execution of this behavior instance
 		recorder.addBehaviorResult(result)
 		result = new BehaviorInstance(behavior)
+	}
+	
+	/**
+	 * Create a new empty StepInstance for recording results.</p>
+	 * 
+	 * Note: This is used only for behaviors without steps.</p>
+	 */
+	def createStepResult() {
+		new StepInstance(behavior)
 	}
 	
 	def private void log(int level, WMessage msg, String action) {

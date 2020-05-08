@@ -3,12 +3,14 @@ package org.nanosite.xwarp.result
 import java.util.Collection
 import java.util.List
 import java.util.Map
+import org.nanosite.xwarp.model.IBehavior
 import org.nanosite.xwarp.model.IPool
 import org.nanosite.xwarp.model.IStep
 import org.nanosite.xwarp.simulation.WIntAccuracy
 
 class StepInstance {
 	
+	val IBehavior behavior
 	val IStep step
 	
 	var long tWaiting = -1L
@@ -61,8 +63,20 @@ class StepInstance {
 
 	var int nMissingCycles = 0
 	
+	/**
+	 * Construct a step instance for a IStep (normal case). 
+	 */
 	new(IStep step) {
+		this.behavior = null
 		this.step = step
+	}
+	
+	/**
+	 * Construct a step instance for a behavior without any steps.
+	 */
+	new(IBehavior behavior) {
+		this.behavior = behavior
+		this.step = null
 	}
 	
 	def setWaitingTime(long timestamp) {
@@ -92,6 +106,17 @@ class StepInstance {
 	
 	def void setNMissingCycles(int nMissingCycles) {
 		this.nMissingCycles = nMissingCycles
+	}
+
+	def String getQualifiedName() {
+		if (step===null)
+			behavior.qualifiedName
+		else
+			step.qualifiedName
+	}
+
+	def getBehavior() {
+		behavior
 	}
 
 	def getStep() {
@@ -150,7 +175,7 @@ class StepInstance {
 	}
 	
 	def void dump() {
-		println(step.qualifiedName)
+		println(this.qualifiedName)
 
 		if (tWaiting!=-1L && tWaiting!=tReady)
 			println('''   «String.format("%09d", tWaiting)» WAITING''')
@@ -169,6 +194,6 @@ class StepInstance {
 	}
 	
 	override String toString() {
-		'''«step.qualifiedName»#«tReady»/«tRunning»/«tDone»'''
+		'''«qualifiedName»#«tReady»/«tRunning»/«tDone»'''
 	}
 }

@@ -11,6 +11,7 @@ import org.nanosite.xwarp.model.IStep
 import org.nanosite.xwarp.result.IResultRecorder
 import org.nanosite.xwarp.result.StepInstance
 import org.nanosite.xwarp.result.StepInstance.Predecessor
+import org.nanosite.xwarp.model.impl.WDummyStep
 
 class WActiveStep implements IJob {
 
@@ -30,7 +31,7 @@ class WActiveStep implements IJob {
 		this.behavior = behavior
 		init(true)
 
-		this.result = new StepInstance(step)
+		this.result = createResultInstance
 	}
 	
 	def private init(boolean firstTime) {
@@ -115,7 +116,7 @@ class WActiveStep implements IJob {
 			recorder.addStepResult(result)
 			prevResult = result
 		}
-		result = new StepInstance(step)
+		result = createResultInstance
 		
 		behavior.exitActionsForStep(this, step.successors)
 		
@@ -127,7 +128,7 @@ class WActiveStep implements IJob {
 		behavior.notifyKilled(this)		
 		
 		// prepare next execution
-		result = new StepInstance(step)
+		result = createResultInstance
 		init(false)
 	}
 
@@ -201,12 +202,19 @@ class WActiveStep implements IJob {
 			// TODO: handle this
 		} else {
 			predecessors.filterNull.forEach[
-				//println("WActiveStep " + this.qualifiedName + ": add predecessor " + it.toString)
+				println("WActiveStep " + this.qualifiedName + ": add predecessor " + it.toString)
 				this.result.addPredecessor(it, type)
 			]
 		}
 	}
-		
+	
+	def private StepInstance createResultInstance() {
+		if (step instanceof WDummyStep) {
+			behavior.createStepResult
+		} else {
+			new StepInstance(step)
+		}
+	}
 	override StepInstance getResult() {
 		result
 	}
