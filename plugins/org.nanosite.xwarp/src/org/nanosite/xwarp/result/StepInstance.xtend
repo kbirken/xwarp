@@ -21,10 +21,13 @@ class StepInstance {
 			// sequential execution of steps in a behavior
 			SEQUENTIAL,
 			
-			// next loop iteration
+			// next loop iteration in a looped behavior
 			LOOP,
+			
+			// behavior has just finished and the next trigger is already waiting 
+			FOLLOWUP,
 
-			// one behavior triggers another
+			// one behavior triggers another (or itself)
 			TRIGGER,
 
 			// repeating a behavior stops because of an unless condition 
