@@ -10,6 +10,9 @@ import org.nanosite.xwarp.result.IResultRecorder
 import org.nanosite.xwarp.result.StepInstance
 import org.nanosite.xwarp.result.StepInstance.Predecessor
 
+/**
+ * Representation of a behavior's state during the simulation. 
+ */
 class WActiveBehavior {
 
 	val IBehavior behavior
@@ -50,6 +53,12 @@ class WActiveBehavior {
 		behavior.qualifiedName
 	}
 	
+	/**
+	 * Receive a trigger and start execution of this behavior.</p>
+	 * 
+	 * The trigger might come from another behavior (via 'send') or
+	 * it might be an initial trigger.</p>
+	 */
 	def void receiveTrigger(WMessage msg, int inputIndex) {
 		log(2, msg, "RECV ")
 	
@@ -63,7 +72,39 @@ class WActiveBehavior {
 			getNextFromQueue(false)
 		}
 	}
+
+	/**
+	 * Check if there is a valid piece of work in the queue and handle it.</p>
+	 * 
+	 * The piece of work might be a single message or a set of messages,
+	 * depending on the configuration of the queue.</p> 
+	 */
+	def private void getNextFromQueue(boolean isFollowup) {
+		if (queue.mayPop) {
+			val msgs = queue.pop
+			currentMessage = msgs.merge
+			
+			// compute predecessors for simulation results
+			// TODO: is there a more elegant way to create an iterator as a concat of two lists?
+			val predecessors = newArrayList()
+			predecessors.addAll(msgs.map[sender])
+			if (isFollowup) {
+				val previous = state.getActiveStep(behavior.lastStep, this)
+				predecessors.add(previous.previousResult)
+			}
+							
+			// set iteration count for repeat-loops
+			iteration = 0
+
+			// execute behavior based on the message(s) from queue
+			log(2, currentMessage, "START")
+			handleTrigger(currentMessage, predecessors)
+		}
+	}
 	
+	/**
+	 * Execute the behavior based on the trigger.
+	 */
 	def private void handleTrigger(WMessage msg, Collection<StepInstance> from) {
 		// check if incoming message has a valid payload 
 		if (msg.isPayloadValid) {
@@ -74,11 +115,17 @@ class WActiveBehavior {
 		}
 		
 		result.startedTime = scheduler.currentTime
-		
-		handleTriggerInternal(from)
+		execute(from)
 	}
 	
-	def private void handleTriggerInternal(Collection<StepInstance> from) {
+	/**
+	 * Start execution of behavior by scheduling its first step.</p>
+	 * 
+	 * Note that if the step has to wait for a precondition,
+	 * it will not be activated, but put into the scheduler's wait-queue
+	 * instead.</p>
+	 */
+	def private void execute(Collection<StepInstance> from) {
 		val firstStep = behavior.firstStep
 		val job = state.getActiveStep(firstStep, this)
 		if (job.isWaiting) {
@@ -94,11 +141,36 @@ class WActiveBehavior {
 		)
 	}
 
-	// this will be called by the behavior's first step (if waiting for preconditions is over)
+	/**
+	 * Check if the behavior is currently running (i.e., busy).</p>
+	 * 
+	 * This will be called by the behavior's first step (if waiting for
+	 * preconditions is over).
+	 */
 	def boolean isRunning() {
 		currentMessage!==null
 	}
+
+	/**
+	 * Check if the behavior has at least finished one time.</p>
+	 */
+	def boolean hasFinishedOnce() {
+		finishedOnce
+	}
 	
+	/**
+	 * Get number of executions until the output data is valid.</p>
+	 */
+	def int getNMissingCycles() {
+ 		behavior.NRequiredCycles - iPayloadCycle
+ 	}
+ 	
+	/**
+	 * Execute activities which are necessary after a step is done.</p>
+	 * 
+	 * This might either unblock successor steps or stop another behavior
+	 * which has a repeat-unless block.</p>
+	 */
 	def void exitActionsForStep(WActiveStep step, List<IStepSuccessor> successors) {
 		// all has been consumed => tell successors that we are ready
 		for(succ : successors) {
@@ -107,8 +179,9 @@ class WActiveBehavior {
 				val simStep = state.getActiveStep(succ, simBehavior)
 				simStep.triggerWaiting(step, scheduler)
 			} else if (succ instanceof IBehavior) {
+				// signal to behavior that unless-condition is now true
 				val simBehavior = state.getActiveBehavior(succ, scheduler, recorder)
-				simBehavior.done(step)
+				simBehavior.signalUnlessCondition(step)
 			}
 		}
 		
@@ -126,13 +199,18 @@ class WActiveBehavior {
 		// execute again if necessary. Without this it will be triggered on the next incoming message only.
 	}
 
-	// this is called to set 'unless' conditions
-	def private void done(WActiveStep signalledBy) {
+	def private void signalUnlessCondition(WActiveStep signalledBy) {
 		// we simply clear unless condition (forever)
 		// this will be checked before any execution of the loop
 		currentUnlessCondition = signalledBy
 	}
 
+	/**
+	 * This finalizes one execution of this behavior's steps.</p>
+	 * 
+	 * Note: If this is a looped behavior, this method will be called
+	 * for each loop iteration.</p>
+	 */
 	def private void lastStepDone(WActiveStep from) {
 		finishedOnce = true
 	
@@ -149,7 +227,7 @@ class WActiveBehavior {
 		val predecessors = newArrayList(from.previousResult)
 		if (iteration < behavior.NIterations) {
 			// still iterations left, trigger myself
-			handleTriggerInternal(predecessors)
+			execute(predecessors)
 		} else if (behavior.unlessCondition!==null) {
 			if (currentUnlessCondition===null) {
 				/*
@@ -159,7 +237,7 @@ class WActiveBehavior {
 				*/
 	
 				// unless condition still false, do another loop
-				handleTriggerInternal(predecessors)
+				execute(predecessors)
 			} else {
 				// unless condition is active, loop ends here
 				from.previousResult.addPredecessor(
@@ -184,29 +262,6 @@ class WActiveBehavior {
 		}
 	}
 	
-	def private void getNextFromQueue(boolean isFollowup) {
-		if (queue.mayPop) {
-			val msgs = queue.pop
-			currentMessage = msgs.merge
-			
-			// compute predecessors for simulation results
-			// TODO: is there a more elegant way to create an iterator as a concat of two lists?
-			val predecessors = newArrayList()
-			predecessors.addAll(msgs.map[sender])
-			if (isFollowup) {
-				val previous = state.getActiveStep(behavior.lastStep, this)
-				predecessors.add(previous.previousResult)
-			}
-							
-			// set iteration count for repeat-loops
-			iteration = 0
-
-			// execute behavior based on the message(s) from queue
-			log(2, currentMessage, "START")
-			handleTrigger(currentMessage, predecessors)
-		}
-	}
-	
 	def private void closeAction() {
 		recordResult()
 
@@ -218,11 +273,10 @@ class WActiveBehavior {
 		currentMessage = null
 	}
 	
-	def int getNMissingCycles() {
- 		behavior.NRequiredCycles - iPayloadCycle
- 	}
- 	
-	def void sendTriggers(WActiveStep from) {
+ 	/**
+ 	 * Send triggers to all successive behaviors.</p>
+ 	 */
+	def private void sendTriggers(WActiveStep from) {
 		// send triggers to successor behaviors
 		val token = currentMessage.token
 		for(trigger : behavior.sendTriggers) {
@@ -249,7 +303,7 @@ class WActiveBehavior {
 	}
 
 	/** Construct new message with existing token and valid-payload indicator */	
-	def WMessage buildMessage(WToken token, IBehavior triggered, StepInstance previous) {
+	def private WMessage buildMessage(WToken token, IBehavior triggered, StepInstance previous) {
 		val newToken =
 			if (behavior.shouldAddToken && triggered!==null) {
 				// this behavior generates its own tokens
@@ -263,16 +317,12 @@ class WActiveBehavior {
 		new WMessage(newToken, previous, isValidPayload)
 	}
 
-	def WToken genToken(WToken parent, IBehavior next) {
+	def private WToken genToken(WToken parent, IBehavior next) {
 		val isLoop = behavior.NIterations>1
 		val info = '''«next.qualifiedName»«IF isLoop»%«iteration»«ENDIF»'''
 		WToken.create(info, parent, logger)
 	}
 
-	def boolean hasFinishedOnce() {
-		finishedOnce
-	}
-	
 	def private void recordResult() {
 		// record result of the execution of this behavior instance
 		recorder.addBehaviorResult(result)
