@@ -20,6 +20,14 @@ class TestBase {
 	 */
 	protected final int MS = 1000;
 
+	def ISimConfig maxIterations(int n) {
+		new SetMaxIterations(n)
+	}
+	
+	def ISimConfig timeLimit(long tl) {
+		new SetTimeLimit(tl)
+	}
+	
 	def protected SimResult simulate(
 		IModel model,
 		int nStepsExpected,
@@ -30,12 +38,37 @@ class TestBase {
 	
 	def protected SimResult simulate(
 		IModel model,
+		ISimConfig[] config,
+		int nStepsExpected,
+		boolean dumpResult
+	) {
+		simulate(model, config, nStepsExpected, 0, dumpResult)		
+	}
+	
+	def protected SimResult simulate(
+		IModel model,
 		int nStepsExpected,
 		int nKilledBehaviors,
 		boolean dumpResult
 	) {
+		simulate(model, newArrayList(), nStepsExpected, nKilledBehaviors, dumpResult)
+	}
+	
+	def protected SimResult simulate(
+		IModel model,
+		ISimConfig[] config,
+		int nStepsExpected,
+		int nKilledBehaviors,
+		boolean dumpResult
+	) {
+		// create simulator and configure it
 		val logger = new WLogger(2)
 		val simulator = new WSimulator(logger) => [ NMaxIterations = 99 ]
+		for(cfg : config) {
+			cfg.applyTo(simulator)			
+		}
+		
+		// run simulation and check results
 		val result = simulator.simulate(model)
 		assertNotNull("Simulation didn't finish properly", result)
 		assertEquals(nStepsExpected, result.stepInstances.filter[it.step!==null].size)
@@ -82,6 +115,14 @@ class TestBase {
 		assertEquals(tWaitingExpected, si.waitingTime/MS)
 		assertEquals(tRunningExpected, si.runningTime/MS)
 		assertEquals(tDoneExpected, si.doneTime/MS)
+	}
+
+	def protected checkMaxIterations(SimResult result, boolean expected) {
+		assertEquals(expected, result.reachedMaxIterations)
+	}
+
+	def protected checkTimeLimit(SimResult result, boolean expected) {
+		assertEquals(expected, result.reachedTimeLimit)
 	}
 
 	def protected checkPool(

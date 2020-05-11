@@ -10,21 +10,35 @@ class SimResult implements IResultRecorder {
 
 	List<IterationResult> iterations = newArrayList
 
+	boolean reachedMaxIterations = false
+	boolean reachedTimeLimit = false
+	
 	List<BehaviorInstance> behaviorInstances = newArrayList
 	List<StepInstance> stepInstances = newArrayList
 	List<WPoolState> poolStates = newArrayList
 
 	List<IBehavior> remainingBehaviors = newArrayList
-		
+
 	def clear() {
 		iterations.clear
+		reachedMaxIterations = false
+		reachedTimeLimit = false
 		behaviorInstances.clear
 		stepInstances.clear
 		poolStates.clear
+		remainingBehaviors.clear
 	}
 
 	def addIteration(IterationResult iteration) {
 		iterations.add(iteration)
+	}
+	
+	def setReachedMaxIterations() {
+		reachedMaxIterations = true
+	}
+	
+	def setReachedTimeLimit() {
+		reachedTimeLimit = true
 	}
 	
 	override addBehaviorResult(BehaviorInstance bi) {
@@ -49,6 +63,14 @@ class SimResult implements IResultRecorder {
 	
 	def getIterations() {
 		iterations
+	}
+	
+	def reachedMaxIterations() {
+		reachedMaxIterations
+	}
+	
+	def reachedTimeLimit() {
+		reachedTimeLimit
 	}
 	
 	def getBehaviorInstances() {

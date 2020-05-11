@@ -32,7 +32,8 @@ class InfiniteLoopTests extends TestBase {
 		]
 		
 		// create simulator and run simulation
-		val result = simulate(model, 100, false)
+		val result = simulate(model, #[maxIterations(99)], 100, false)
+		result.checkMaxIterations(true)
 		result.check("Bhvr2::S1", 49, 2470, 2470, 2500)
 	}
 
@@ -64,6 +65,7 @@ class InfiniteLoopTests extends TestBase {
 		
 		// create simulator and run simulation
 		val result = simulate(model, 2, 1, false)
+		result.checkMaxIterations(false)
 		result.check("Bhvr1::S1", 0, 0, 0)
 		result.check("Bhvr2::S1", 0, 0, 0)
 	}
@@ -94,6 +96,7 @@ class InfiniteLoopTests extends TestBase {
 		
 		// create simulator and run simulation
 		val result = simulate(model, 0, 1, false)
+		result.checkMaxIterations(false)
 	}
 
 }

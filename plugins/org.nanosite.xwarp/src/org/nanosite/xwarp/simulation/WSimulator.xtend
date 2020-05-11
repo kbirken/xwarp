@@ -10,14 +10,22 @@ import org.nanosite.xwarp.model.IScheduledConsumable
 import org.nanosite.xwarp.model.impl.WUnlimitedResource
 import org.nanosite.xwarp.result.IterationResult
 import org.nanosite.xwarp.result.SimResult
-import org.nanosite.xwarp.result.StepInstance
 
 class WSimulator implements IScheduler {
 
 	val ILogger logger
 	
+	/** maximum number of iterations */
+	var nMaxIter = 1999
+
+	/** constant for "no simulation time limit" */
+	val static tLimitNone = -1L
+	
+	/** simulation time limit (in microseconds) */
+	var tLimit = tLimitNone
+	
+	/** current simulation time */	
 	var long time
-	var nMax = 1999
 	
 	val List<IJob> readyList = newArrayList
 	val List<IJob> runningList = newArrayList
@@ -32,7 +40,17 @@ class WSimulator implements IScheduler {
 	}
 	
 	def setNMaxIterations(int nMax) {
-		this.nMax = nMax
+		this.nMaxIter = nMax
+	}
+	
+	/**
+	 * Set time limit for simulation (in milliseconds)
+	 */
+	def setTimeLimit(long tLimit) {
+		if (tLimit==tLimitNone)
+			this.tLimit = tLimitNone
+		else
+			this.tLimit = tLimit*1000
 	}
 	
 	def SimResult simulate(IModel model) {
@@ -57,7 +75,17 @@ class WSimulator implements IScheduler {
 		// iterate through time
 		var healthy = true
 		var iteration = 0
-		while (healthy && iteration<=nMax && (!readyList.empty || !runningList.empty)) {
+		val tLimitCalc =
+			if (tLimit==tLimitNone)
+				tLimitNone
+			else
+				WIntAccuracy.toCalc(tLimit)
+		while (
+			healthy &&
+			iteration<=nMaxIter &&
+			(tLimitCalc==tLimitNone || time<tLimitCalc) &&
+			(!readyList.empty || !runningList.empty)
+		) {
 			logger.log(1,
 				ILogger.Type.INFO,
 				'''ITER «String.format("%5d", iteration)»   (ready=«readyList.size»  running=«runningList.size»)'''
@@ -76,10 +104,19 @@ class WSimulator implements IScheduler {
 			iteration++
 		}
 		
-		if (iteration>=nMax) {
+		if (iteration >= nMaxIter) {
+			result.setReachedMaxIterations
 			logger.log(1,
 				ILogger.Type.INFO,
-				'''simulation ended due to max number of iterations (max=«nMax»)'''
+				'''simulation ended due to max number of iterations (max=«nMaxIter»)'''
+			)
+		}
+		
+		if (tLimit!=tLimitNone && time >= tLimitCalc) {
+			result.setReachedTimeLimit
+			logger.log(1,
+				ILogger.Type.INFO,
+				'''simulation ended due to time limit reached (tLimit=«tLimit»)'''
 			)
 		}
 		
