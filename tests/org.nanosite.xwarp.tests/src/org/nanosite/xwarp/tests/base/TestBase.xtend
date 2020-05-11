@@ -2,7 +2,7 @@ package org.nanosite.xwarp.tests.base
 
 import org.nanosite.xwarp.model.IModel
 import org.nanosite.xwarp.model.TestModelBuilder
-import org.nanosite.xwarp.result.SimResult
+import org.nanosite.xwarp.result.ISimResult
 import org.nanosite.xwarp.simulation.WLogger
 import org.nanosite.xwarp.simulation.WSimulator
 
@@ -28,7 +28,7 @@ class TestBase {
 		new SetTimeLimit(tl)
 	}
 	
-	def protected SimResult simulate(
+	def protected ISimResult simulate(
 		IModel model,
 		int nStepsExpected,
 		boolean dumpResult
@@ -36,7 +36,7 @@ class TestBase {
 		simulate(model, nStepsExpected, 0, dumpResult)		
 	}
 	
-	def protected SimResult simulate(
+	def protected ISimResult simulate(
 		IModel model,
 		ISimConfig[] config,
 		int nStepsExpected,
@@ -45,7 +45,7 @@ class TestBase {
 		simulate(model, config, nStepsExpected, 0, dumpResult)		
 	}
 	
-	def protected SimResult simulate(
+	def protected ISimResult simulate(
 		IModel model,
 		int nStepsExpected,
 		int nKilledBehaviors,
@@ -54,7 +54,7 @@ class TestBase {
 		simulate(model, newArrayList(), nStepsExpected, nKilledBehaviors, dumpResult)
 	}
 	
-	def protected SimResult simulate(
+	def protected ISimResult simulate(
 		IModel model,
 		ISimConfig[] config,
 		int nStepsExpected,
@@ -82,7 +82,7 @@ class TestBase {
 	}
 
 	def protected check(
-		SimResult result,
+		ISimResult result,
 		String stepName,
 		long tWaitingExpected,
 		long tRunningExpected,
@@ -96,7 +96,7 @@ class TestBase {
 	}
 	
 	def protected check(
-		SimResult result,
+		ISimResult result,
 		String stepName,
 		int instance,
 		long tWaitingExpected,
@@ -117,16 +117,16 @@ class TestBase {
 		assertEquals(tDoneExpected, si.doneTime/MS)
 	}
 
-	def protected checkMaxIterations(SimResult result, boolean expected) {
+	def protected checkMaxIterations(ISimResult result, boolean expected) {
 		assertEquals(expected, result.reachedMaxIterations)
 	}
 
-	def protected checkTimeLimit(SimResult result, boolean expected) {
+	def protected checkTimeLimit(ISimResult result, boolean expected) {
 		assertEquals(expected, result.reachedTimeLimit)
 	}
 
 	def protected checkPool(
-		SimResult result,
+		ISimResult result,
 		String poolName,
 		long allocatedExpected,
 		int nOverflowsExpected,
@@ -142,7 +142,7 @@ class TestBase {
 	}
 
 	def protected checkPool(
-		SimResult result,
+		ISimResult result,
 		String stepName,
 		String poolName,
 		long allocatedExpected,
@@ -159,7 +159,7 @@ class TestBase {
 	}
 	
 	def protected checkCycles(
-		SimResult result,
+		ISimResult result,
 		String stepName,
 		int instance,
 		int nMissingCyclesExpected

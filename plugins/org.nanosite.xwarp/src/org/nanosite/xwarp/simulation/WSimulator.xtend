@@ -8,6 +8,7 @@ import org.nanosite.xwarp.model.IAllocatingConsumable
 import org.nanosite.xwarp.model.IModel
 import org.nanosite.xwarp.model.IScheduledConsumable
 import org.nanosite.xwarp.model.impl.WUnlimitedResource
+import org.nanosite.xwarp.result.ISimResult
 import org.nanosite.xwarp.result.IterationResult
 import org.nanosite.xwarp.result.SimResult
 
@@ -53,7 +54,7 @@ class WSimulator implements IScheduler {
 			this.tLimit = tLimit*1000
 	}
 	
-	def SimResult simulate(IModel model) {
+	def ISimResult simulate(IModel model) {
 		
 		// set simulation time
 		time = 0L

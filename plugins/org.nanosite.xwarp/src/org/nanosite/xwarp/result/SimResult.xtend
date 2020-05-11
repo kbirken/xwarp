@@ -6,7 +6,7 @@ import org.nanosite.xwarp.model.IPool
 import org.nanosite.xwarp.model.IStep
 import org.nanosite.xwarp.simulation.WPoolState
 
-class SimResult implements IResultRecorder {
+class SimResult implements IResultRecorder, ISimResult {
 
 	List<IterationResult> iterations = newArrayList
 
@@ -57,53 +57,53 @@ class SimResult implements IResultRecorder {
 		remainingBehaviors.addAll(behaviors)
 	}
 	
-	def getNIterations() {
+	override getNIterations() {
 		iterations.size
 	}
 	
-	def getIterations() {
+	override getIterations() {
 		iterations
 	}
 	
-	def reachedMaxIterations() {
+	override reachedMaxIterations() {
 		reachedMaxIterations
 	}
 	
-	def reachedTimeLimit() {
+	override reachedTimeLimit() {
 		reachedTimeLimit
 	}
 	
-	def getBehaviorInstances() {
+	override getBehaviorInstances() {
 		behaviorInstances
 	}
 	
-	def getKilledBehaviorInstances() {
+	override getKilledBehaviorInstances() {
 		behaviorInstances.filter[wasKilled]
 	}
 	
-	def getStepInstances() {
+	override getStepInstances() {
 		stepInstances
 	}
 	
-	def List<StepInstance> getStepInstances(IStep step) {
+	override List<StepInstance> getStepInstances(IStep step) {
 		// TODO: introduce multimap for performance
 		stepInstances.filter[it.step==step].toList
 	}
 
-	def getPoolStates() {
+	override getPoolStates() {
 		poolStates
 	}
 	
-	def getPoolState(IPool pool) {
+	override getPoolState(IPool pool) {
 		// TODO: introduce map for performance
 		poolStates.findFirst[it.pool==pool]
 	}
 	
-	def getRemainingBehaviors() {
+	override getRemainingBehaviors() {
 		remainingBehaviors
 	}
 
-	def dump() {
+	override dump() {
 		println("ITERATIONS: ")
 		for(iter : iterations)
 			iter.dump
