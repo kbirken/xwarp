@@ -20,11 +20,14 @@ class StepInstance {
 	
 	static public class Predecessor {
 		public enum Type {
-			// sequential execution of steps in a behavior
+			// sequential execution of steps in the same behavior
 			SEQUENTIAL,
 			
 			// next loop iteration in a looped behavior
 			LOOP,
+			
+			// unblocking of a precondition
+			UNBLOCK,
 			
 			// behavior has just finished and the next trigger is already waiting 
 			FOLLOWUP,
@@ -115,10 +118,29 @@ class StepInstance {
 			step.qualifiedName
 	}
 
+	/**
+	 * Returns the behavior for this StepInstance.</p>
+	 *  
+	 * This should be used only if the behavior for this
+	 * StepInstance doesn't have any steps. If the behavior
+	 * has at least one step, use getStep() instead.</p>
+	 * 
+	 * @return the behavior for this StepInstance, or
+	 *         null if the behavior has at least one step.
+	 */
 	def getBehavior() {
 		behavior
 	}
 
+	/**
+	 * Returns the step corresponding to this StepInstance.</p>
+	 * 
+	 * Note: If this is a step instance of a behavior without 
+	 * steps, this will return null. Use getBehavior() instead.</p>
+	 * 
+	 * @return the step for this StepInstance, or
+	 *         null if the behavior doesn't have any steps.
+	 */
 	def getStep() {
 		step
 	}

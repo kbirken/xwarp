@@ -112,7 +112,7 @@ class WActiveStep implements IJob {
 	
 	override void exitActions(IResultRecorder recorder) {
 		// record result of the execution of this step instance
-		if (result!==null && shouldLog) {
+		if (result!==null) {
 			recorder.addStepResult(result)
 			prevResult = result
 		}
@@ -133,8 +133,6 @@ class WActiveStep implements IJob {
 	}
 
 	def void triggerWaiting(WActiveStep from, IScheduler scheduler) {
-		//printf("CStep::done %s: %s is done - waitfor=%d\n", getQualifiedName().c_str(), step->getQualifiedName().c_str(), _waitFor.size());
-	
 		if (waitingFor.empty) {
 			throw new RuntimeException(
 				"Internal error: Missing predecessor '" + from.qualifiedName + "' " +
@@ -164,7 +162,12 @@ class WActiveStep implements IJob {
 		
 		// record dependency on StepInstance level
 //		eventAcceptor.signalReady(step, this, runNow);
-		tracePredecessor(from.previousResult, Predecessor.Type.SEQUENTIAL)
+		tracePredecessor(from.previousResult,
+			if (this.step.hasSameBehavior(from.step))
+				Predecessor.Type.SEQUENTIAL
+			else
+				Predecessor.Type.UNBLOCK
+		)
 	}
 
 	override void traceWaiting(long timestamp) {
@@ -202,7 +205,6 @@ class WActiveStep implements IJob {
 			// TODO: handle this
 		} else {
 			predecessors.filterNull.forEach[
-				println("WActiveStep " + this.qualifiedName + ": add predecessor " + it.toString)
 				this.result.addPredecessor(it, type)
 			]
 		}

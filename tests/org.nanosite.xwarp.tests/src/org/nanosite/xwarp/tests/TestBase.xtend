@@ -35,10 +35,10 @@ class TestBase {
 		boolean dumpResult
 	) {
 		val logger = new WLogger(2)
-		val simulator = new WSimulator(logger) => [ NMaxIterations = 99]
+		val simulator = new WSimulator(logger) => [ NMaxIterations = 99 ]
 		val result = simulator.simulate(model)
 		assertNotNull("Simulation didn't finish properly", result)
-		assertEquals(nStepsExpected, result.stepInstances.size)
+		assertEquals(nStepsExpected, result.stepInstances.filter[it.step!==null].size)
 		assertEquals(nKilledBehaviors, result.killedBehaviorInstances.size)
 		if (dumpResult) {
 			println("---")
@@ -71,7 +71,7 @@ class TestBase {
 		long tDoneExpected
 	) {
 		// search for part of step name only
-		val instances = result.stepInstances.filter[step.qualifiedName.contains(stepName)]
+		val instances = result.stepInstances.filter[qualifiedName.contains(stepName)]
 		assertFalse("Cannot find step result for name '" + stepName + "'", instances.empty)
 
 		assertTrue("Cannot find instance " + instance + " for step for name '" + stepName + "'",
@@ -109,7 +109,7 @@ class TestBase {
 		boolean underflowExpected
 	) {
 		// search for part of step name only
-		val si = result.stepInstances.findFirst[step.qualifiedName.contains(stepName)]
+		val si = result.stepInstances.findFirst[qualifiedName.contains(stepName)]
 		assertNotNull("Cannot find step result for name '" + stepName + "'", si)
 		
 		assertEquals(allocatedExpected, si.getPoolUsage(poolName))
@@ -124,7 +124,7 @@ class TestBase {
 		int nMissingCyclesExpected
 	) {
 		// search for part of step name only
-		val instances = result.stepInstances.filter[step.qualifiedName.contains(stepName)]
+		val instances = result.stepInstances.filter[qualifiedName.contains(stepName)]
 		assertFalse("Cannot find step result for name '" + stepName + "'", instances.empty)
 
 		assertTrue("Cannot find instance " + instance + " for step for name '" + stepName + "'",

@@ -64,7 +64,6 @@ class WActiveBehavior {
 	
 		// always queue incoming messages, the queue will decide if some work results from this
 		queue.push(inputIndex, msg)
-		println("receiveTrigger "+msg)
 		
 		if (currentMessage!==null) {
 			// we are busy, do nothing now
