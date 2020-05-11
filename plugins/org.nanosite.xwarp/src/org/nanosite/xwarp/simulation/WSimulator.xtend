@@ -19,13 +19,13 @@ class WSimulator implements IScheduler {
 	/** maximum number of iterations */
 	var nMaxIter = 1999
 
-	/** constant for "no simulation time limit" */
+	/** constant for "no simulated time limit" */
 	val static tLimitNone = -1L
 	
-	/** simulation time limit (in microseconds) */
+	/** simulated time limit (in microseconds) */
 	var tLimit = tLimitNone
 	
-	/** current simulation time */	
+	/** current simulated time */	
 	var long time
 	
 	val List<IJob> readyList = newArrayList
@@ -45,18 +45,15 @@ class WSimulator implements IScheduler {
 	}
 	
 	/**
-	 * Set time limit for simulation (in milliseconds)
+	 * Set limit for simulated time (in microseconds)
 	 */
 	def setTimeLimit(long tLimit) {
-		if (tLimit==tLimitNone)
-			this.tLimit = tLimitNone
-		else
-			this.tLimit = tLimit*1000
+		this.tLimit = tLimit
 	}
 	
 	def ISimResult simulate(IModel model) {
 		
-		// set simulation time
+		// set simulated time
 		time = 0L
 		
 		// reset SimState and SimResult

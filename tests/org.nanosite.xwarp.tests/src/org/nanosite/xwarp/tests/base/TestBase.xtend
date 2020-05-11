@@ -24,8 +24,9 @@ class TestBase {
 		new SetMaxIterations(n)
 	}
 	
+	/** Time limit is given in milliseconds (as all other numbers in the test). */
 	def ISimConfig timeLimit(long tl) {
-		new SetTimeLimit(tl)
+		new SetTimeLimit(tl * MS)
 	}
 	
 	def protected ISimResult simulate(
