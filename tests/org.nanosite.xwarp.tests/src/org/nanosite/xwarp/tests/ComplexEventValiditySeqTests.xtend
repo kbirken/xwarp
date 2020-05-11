@@ -2,6 +2,7 @@ package org.nanosite.xwarp.tests
 
 import org.junit.Test
 import org.nanosite.xwarp.model.IModel
+import org.nanosite.xwarp.tests.base.TestBase
 
 class ComplexEventValiditySeqTests extends TestBase {
 

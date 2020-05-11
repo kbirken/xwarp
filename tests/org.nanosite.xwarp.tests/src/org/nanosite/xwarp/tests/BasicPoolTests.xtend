@@ -1,8 +1,9 @@
 package org.nanosite.xwarp.tests
 
 import org.junit.Test
+import org.nanosite.xwarp.tests.base.TestBase
 
-import static org.nanosite.xwarp.model.IPool.ErrorAction.*
+import static org.nanosite.xwarp.model.IAllocatingConsumable.ErrorAction.*
 
 class BasicPoolTests extends TestBase {
 	

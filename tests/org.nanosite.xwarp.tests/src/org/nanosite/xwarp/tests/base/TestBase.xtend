@@ -1,4 +1,4 @@
-package org.nanosite.xwarp.tests
+package org.nanosite.xwarp.tests.base
 
 import org.nanosite.xwarp.model.IModel
 import org.nanosite.xwarp.model.TestModelBuilder
