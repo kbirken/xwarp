@@ -209,6 +209,10 @@ class StepInstance {
 
 		println('''   «String.format("%09d", tDone)» DONE''')
 		
+		for(pred : predecessors) {
+			println('''   predecessor «pred.stepInstance.qualifiedName» of type «pred.type»''')	
+		}
+		
 		for(pool : poolStates.keySet) {
 			val ps = poolStates.get(pool)
 			println('''   pool state '«pool»': «ps.amount»«IF ps.overflow» overflow!«ENDIF»«IF ps.underflow» underflow!«ENDIF»''')

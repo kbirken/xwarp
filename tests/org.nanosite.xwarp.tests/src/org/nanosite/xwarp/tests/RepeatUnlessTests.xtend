@@ -23,7 +23,7 @@ class RepeatUnlessTests extends TestBase {
 				behavior("B2") => [
 					repeatUnless("B1S1")
 					add(
-						step("B2S1", #{ cpu2->250L })
+						step("LOOP", #{ cpu2->250L })
 					)
 				]
 			)
@@ -43,10 +43,10 @@ class RepeatUnlessTests extends TestBase {
 		val result = simulate(model, 6, false)
 		result.check("B1S1", 0, 0, 1000)
 		result.check("B1S2", 1000, 1000, 2000)
-		result.check("B2S1", 0,   0,   0, 250)
-		result.check("B2S1", 1, 250, 250, 500)
-		result.check("B2S1", 2, 500, 500, 750)
-		result.check("B2S1", 3, 750, 750, 1000)
+		result.check("LOOP", 0,   0,   0, 250)
+		result.check("LOOP", 1, 250, 250, 500)
+		result.check("LOOP", 2, 500, 500, 750)
+		result.check("LOOP", 3, 750, 750, 1000)
 	}
 		
 	@Test

@@ -238,7 +238,7 @@ class WActiveBehavior {
 				execute(null, true)
 			} else {
 				// unless condition is active, loop ends here
-				from.tracePredecessor(
+				from.previousResult.addPredecessor(
 					currentUnlessCondition.previousResult,
 					Predecessor.Type.UNLESS_CONDITION
 				)
