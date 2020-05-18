@@ -89,12 +89,37 @@ class ModelBuilder {
 		}
 	}
 	
+	def WQueueConfig.Limit limit(int nMaxEntries, WQueueConfig.Limit.Policy policy) {
+		new WQueueConfig.Limit(nMaxEntries, policy)
+	}
+	
 	def WQueueConfig queueConfig(int nQueues, WQueueConfig.Strategy strategy) {
 		new WQueueConfig(nQueues, strategy)
 	}
 	
+	def WQueueConfig queueConfig(WQueueConfig.Limit limit) {
+		new WQueueConfig(limit)
+	}
+	
+	def WQueueConfig queueConfig(
+		int nQueues,
+		WQueueConfig.Strategy strategy,
+		Map<Integer, WQueueConfig.Limit> limits
+	) {
+		new WQueueConfig(nQueues, strategy, limits)
+	}
+	
 	def WQueueConfig queueConfig(int nInstant, int nQueues, WQueueConfig.Strategy strategy) {
 		new WQueueConfig(nInstant, nQueues, strategy)
+	}
+	
+	def WQueueConfig queueConfig(
+		int nInstant,
+		int nQueues,
+		WQueueConfig.Strategy strategy,
+		Map<Integer, WQueueConfig.Limit> limits
+	) {
+		new WQueueConfig(nInstant, nQueues, strategy, limits)
 	}
 	
 	def IBehavior behavior(String name) {

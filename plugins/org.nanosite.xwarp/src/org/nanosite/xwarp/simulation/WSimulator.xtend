@@ -67,7 +67,14 @@ class WSimulator implements IScheduler {
 			val active = state.getActiveBehavior(behavior, this, result)
 			val token = WToken.create(behavior.qualifiedName, logger)
 			val msg = new WMessage(token, null)
-			active.receiveTrigger(msg, trigger.inputIndex, time)
+			try {
+				active.receiveTrigger(msg, trigger.inputIndex, time)
+			} catch (IScheduler.QueueAbortException ex) {
+				logger.log(1, ILogger.Type.INFO, '''simulation ended due to «ex.message»''')
+				result.setQueueOverflowAbort(ex.behavior, ex.inputIndex)
+				storeResults(model)
+				return result
+			}
 		}
 		
 		// iterate through time
@@ -89,16 +96,25 @@ class WSimulator implements IScheduler {
 				'''ITER «String.format("%5d", iteration)»   (ready=«readyList.size»  running=«runningList.size»)'''
 			)
 
-			val ok = doIteration(
-				model.scheduledConsumables,
-				model.allocatingConsumables,
-				iteration
-				/*scheds, isLimited, loadfile*/
-			);
-			if (!ok) {
-				// error message is printed inside iteration()
-				return null
+			try { 
+				val ok = doIteration(
+					model.scheduledConsumables,
+					model.allocatingConsumables,
+					iteration
+					/*scheds, isLimited, loadfile*/
+				);
+				if (!ok) {
+					// error message is printed inside iteration()
+					return null
+				}
+			} catch (IScheduler.QueueAbortException ex) {
+				logger.log(1, ILogger.Type.INFO, '''simulation ended due to «ex.message»''')
+				result.setQueueOverflowAbort(ex.behavior, ex.inputIndex)
+				storeResults(model)
+				return result
 			}
+			
+			// advance to next iteration
 			iteration++
 		}
 		
@@ -118,6 +134,11 @@ class WSimulator implements IScheduler {
 			)
 		}
 		
+		storeResults(model)
+		result
+	}
+	
+	def private storeResults(IModel model) {
 		// copy all pool states to simulation result
 		state.poolStates.forEach[result.addPoolState(it)]
 		
@@ -128,8 +149,6 @@ class WSimulator implements IScheduler {
 		val neverStarted = Sets.difference(allBehaviors, started)
 		result.addRemainingBehaviors(startedAndNeverFinished)
 		result.addRemainingBehaviors(neverStarted)
-
-		result
 	}
 	
 	def private boolean doIteration(

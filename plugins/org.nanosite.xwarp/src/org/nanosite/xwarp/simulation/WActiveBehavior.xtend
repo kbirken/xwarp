@@ -9,6 +9,7 @@ import org.nanosite.xwarp.result.BehaviorInstance
 import org.nanosite.xwarp.result.IResultRecorder
 import org.nanosite.xwarp.result.StepInstance
 import org.nanosite.xwarp.result.StepInstance.Predecessor
+import org.nanosite.xwarp.simulation.IQueue.PushResult
 
 /**
  * Representation of a behavior's state during the simulation. 
@@ -63,7 +64,14 @@ class WActiveBehavior {
 		log(2, msg, "RECV ")
 	
 		// always queue incoming messages, the queue will decide if some work results from this
-		queue.push(inputIndex, msg, tCurrent)
+		val result = queue.push(inputIndex, msg, tCurrent)
+		if (result!==PushResult.OK) {
+			val loc = this.behavior.qualifiedName + " queue #" + inputIndex
+			logger.log(2, ILogger.Type.INFO, "Queue overflow at " + loc)
+			if (result==PushResult.ABORT_SIMULATION) {
+				throw new IScheduler.QueueAbortException(this.behavior, inputIndex)
+			}
+		}
 		
 		if (currentMessage!==null) {
 			// we are busy, do nothing now

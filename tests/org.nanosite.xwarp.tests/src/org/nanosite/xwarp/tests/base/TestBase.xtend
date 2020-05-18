@@ -125,6 +125,13 @@ class TestBase {
 	def protected checkTimeLimit(ISimResult result, boolean expected) {
 		assertEquals(expected, result.reachedTimeLimit)
 	}
+	
+	def protected checkQueueAbort(ISimResult result, String expectedBehavior, int expectedInputIndex) {
+		val qoa = result.queueOverflowAbort
+		assertNotNull(qoa)
+		assertEquals(expectedBehavior, qoa.key.qualifiedName)
+		assertEquals(expectedInputIndex, qoa.value)
+	}
 
 	def protected checkPool(
 		ISimResult result,

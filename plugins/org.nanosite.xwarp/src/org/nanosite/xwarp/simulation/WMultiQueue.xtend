@@ -16,19 +16,23 @@ class WMultiQueue {
 		if (config.NInstant>0)
 			for(i : 1..config.NInstant)
 				queues.add(new WInstantQueue)
-		if (config.NQueues>0)
-			for(i : 1..config.NQueues)
-				queues.add(new WMessageQueue)
+		if (config.NQueues>0) {
+			for(i : 1..config.NQueues) {
+				// limit-config is optional and might be null 
+				val limit = config.getLimit(i-1)
+				queues.add(new WMessageQueue(limit))
+			}
+		}
 	}
 	
-	def void push(int idx, WMessage msg, long tCurrent) {
+	def WMessageQueue.PushResult push(int idx, WMessage msg, long tCurrent) {
 		flushInstants(tCurrent)
 		if (idx >= queues.size) {
 			throw new RuntimeException(
 				"Invalid queue index " + idx + ", #queues=" + queues.size
 			)
 		}
-		queues.get(idx).push(msg, tCurrent)
+		return queues.get(idx).push(msg, tCurrent)
 	}
 	
 	def boolean mayPop() {

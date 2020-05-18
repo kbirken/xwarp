@@ -11,6 +11,7 @@ class WInstantQueue implements IQueue {
 	override push(WMessage message, long tCurrent) {
 		item = message
 		tItem = tCurrent
+		return PushResult.OK
 	}
 	
 	override pop() {
