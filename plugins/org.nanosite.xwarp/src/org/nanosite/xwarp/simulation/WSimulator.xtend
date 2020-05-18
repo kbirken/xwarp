@@ -67,7 +67,7 @@ class WSimulator implements IScheduler {
 			val active = state.getActiveBehavior(behavior, this, result)
 			val token = WToken.create(behavior.qualifiedName, logger)
 			val msg = new WMessage(token, null)
-			active.receiveTrigger(msg, trigger.inputIndex)
+			active.receiveTrigger(msg, trigger.inputIndex, time)
 		}
 		
 		// iterate through time

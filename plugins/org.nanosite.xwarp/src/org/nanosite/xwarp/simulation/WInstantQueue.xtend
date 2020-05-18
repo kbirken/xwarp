@@ -2,13 +2,15 @@ package org.nanosite.xwarp.simulation
 
 class WInstantQueue implements IQueue {
 	var WMessage item = null
+	var long tItem = 0L
 	
 	override isEmpty() {
 		item===null
 	}
 	
-	override push(WMessage message) {
+	override push(WMessage message, long tCurrent) {
 		item = message
+		tItem = tCurrent
 	}
 	
 	override pop() {
@@ -17,7 +19,8 @@ class WInstantQueue implements IQueue {
 		msg
 	}
 	
-	override clear() {
-		item = null
+	def clear(long tCurrent) {
+		if (item!==null && tItem<tCurrent)
+			item = null
 	}
 }

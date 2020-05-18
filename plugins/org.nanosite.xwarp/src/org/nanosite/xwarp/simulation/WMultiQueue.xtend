@@ -21,14 +21,14 @@ class WMultiQueue {
 				queues.add(new WMessageQueue)
 	}
 	
-	def void push(int idx, WMessage msg) {
-		flushInstants
+	def void push(int idx, WMessage msg, long tCurrent) {
+		flushInstants(tCurrent)
 		if (idx >= queues.size) {
 			throw new RuntimeException(
 				"Invalid queue index " + idx + ", #queues=" + queues.size
 			)
 		}
-		queues.get(idx).push(msg)
+		queues.get(idx).push(msg, tCurrent)
 	}
 	
 	def boolean mayPop() {
@@ -60,13 +60,16 @@ class WMultiQueue {
 				throw new RuntimeException("Invalid strategy")
 		}
 		
-		flushInstants
+		flushInstants(Long.MAX_VALUE)
 		
 		result
 	}
 	
-	def private flushInstants() {
-		// reset all instant inputs, filter() is used instead of a cast 
-		queues.subList(0, nInstant).filter(WInstantQueue).forEach[clear]
+	def private flushInstants(long tCurrent) {
+		// filter() is used instead of a cast 
+		val instantQueues = queues.subList(0, nInstant).filter(WInstantQueue)
+
+		// reset all instant inputs which are older than tCurrent
+		instantQueues.forEach[clear(tCurrent)]
 	}
 }

@@ -10,15 +10,11 @@ class WMessageQueue implements IQueue {
 		queue.empty
 	}
 	
-	override push(WMessage message) {
+	override push(WMessage message, long tCurrent) {
 		queue.add(message)
 	}
 	
 	override pop() {
 		queue.poll
-	}
-	
-	override clear() {
-		queue.clear
 	}
 }

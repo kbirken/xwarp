@@ -59,11 +59,11 @@ class WActiveBehavior {
 	 * The trigger might come from another behavior (via 'send') or
 	 * it might be an initial trigger.</p>
 	 */
-	def void receiveTrigger(WMessage msg, int inputIndex) {
+	def void receiveTrigger(WMessage msg, int inputIndex, long tCurrent) {
 		log(2, msg, "RECV ")
 	
 		// always queue incoming messages, the queue will decide if some work results from this
-		queue.push(inputIndex, msg)
+		queue.push(inputIndex, msg, tCurrent)
 		
 		if (currentMessage!==null) {
 			// we are busy, do nothing now
@@ -280,7 +280,7 @@ class WActiveBehavior {
 		for(trigger : behavior.sendTriggers) {
 			val msg = buildMessage(token, trigger.behavior, from.previousResult)
 			val simBehavior = state.getActiveBehavior(trigger.behavior, scheduler, recorder)
-			simBehavior.receiveTrigger(msg, trigger.inputIndex)
+			simBehavior.receiveTrigger(msg, trigger.inputIndex, scheduler.currentTime)
 		}
 	}
 
