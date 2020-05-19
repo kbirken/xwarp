@@ -17,7 +17,16 @@ interface ISimResult {
 	def boolean reachedMaxIterations()
 	def boolean reachedTimeLimit()
 
-	def Pair<IBehavior, Integer> getQueueOverflowAbort()
+	public static class QueueOverflow {
+		public IBehavior behavior
+		public int inputIndex
+		new(IBehavior behavior, int inputIndex) {
+			this.behavior = behavior
+			this.inputIndex = inputIndex
+		}
+	}
+
+	def QueueOverflow getQueueOverflowAbort()
 	
 	def List<BehaviorInstance> getBehaviorInstances()
 	def Iterable<BehaviorInstance> getKilledBehaviorInstances()

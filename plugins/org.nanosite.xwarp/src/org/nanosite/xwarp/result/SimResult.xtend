@@ -12,7 +12,8 @@ class SimResult implements IResultRecorder, ISimResult {
 
 	boolean reachedMaxIterations = false
 	boolean reachedTimeLimit = false
-	Pair<IBehavior, Integer> queueOverflowAbort = null
+	
+	QueueOverflow queueOverflowAbort = null
 	
 	List<BehaviorInstance> behaviorInstances = newArrayList
 	List<StepInstance> stepInstances = newArrayList
@@ -44,7 +45,7 @@ class SimResult implements IResultRecorder, ISimResult {
 	}
 	
 	def setQueueOverflowAbort(IBehavior behavior, int inputIndex) {
-		queueOverflowAbort = behavior -> inputIndex
+		queueOverflowAbort = new QueueOverflow(behavior, inputIndex)
 	}
 	
 	override addBehaviorResult(BehaviorInstance bi) {

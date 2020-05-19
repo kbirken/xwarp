@@ -129,8 +129,8 @@ class TestBase {
 	def protected checkQueueAbort(ISimResult result, String expectedBehavior, int expectedInputIndex) {
 		val qoa = result.queueOverflowAbort
 		assertNotNull(qoa)
-		assertEquals(expectedBehavior, qoa.key.qualifiedName)
-		assertEquals(expectedInputIndex, qoa.value)
+		assertEquals(expectedBehavior, qoa.behavior.qualifiedName)
+		assertEquals(expectedInputIndex, qoa.inputIndex)
 	}
 
 	def protected checkPool(
