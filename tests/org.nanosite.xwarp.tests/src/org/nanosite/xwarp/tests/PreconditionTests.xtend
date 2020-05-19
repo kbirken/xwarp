@@ -88,4 +88,46 @@ class PreconditionTests extends TestBase {
 		result.check("B2S1", 0, 0, 20)
 		result.check("B2S2", 20, 500, 810)
 	}
+	
+	@Test
+	def void testPreconditionTwice() {
+		// create software model
+		val consumer1 = consumer("Component1") => [
+			add(
+				behavior("B1") => [
+					add(
+						step("B1S1", 50L)
+					)
+				],
+				behavior("B2") => [
+					add(
+						step("B2S1", 200L) => [
+							precondition("B1S1")
+						]
+					)
+				]
+			)
+		]
+
+		// build model to be simulated
+		val model = model => [
+			add(consumer1)
+			addInitial(
+				consumer1.behaviors.get(0),
+				consumer1.behaviors.get(0),
+				consumer1.behaviors.get(1)
+			)
+		]
+
+		// the precondition will be triggered a second time while B2S1 is still running, 
+		// but B2S1 is not waiting for it anymore and will just ignore it.
+		
+		// create simulator and run simulation
+		val result = simulate(model, 3, false)
+		result.check("B1S1", 0,  0,  0,  50)
+		result.check("B1S1", 1, 50, 50, 100)
+		result.check("B2S1", 0,  0, 50, 250)
+	}
+	
+
 }

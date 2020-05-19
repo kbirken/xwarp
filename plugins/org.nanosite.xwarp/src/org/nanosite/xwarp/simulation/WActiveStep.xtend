@@ -133,16 +133,16 @@ class WActiveStep implements IJob {
 	}
 
 	def void triggerWaiting(WActiveStep from, IScheduler scheduler) {
-		if (waitingFor.empty) {
-			throw new RuntimeException(
-				"Internal error: Missing predecessor '" + from.qualifiedName + "' " +
-				"for step '" + qualifiedName + "'"
-			)
+		val blocker = from.step
+		if (! waitingFor.contains(blocker)) {
+			// we are not waiting for the blocking step, just ignore it
+			// (this happens e.g. if a precondition is satisfied a second time)
+			return
 		}
 
 		// we are no more waiting for the notifying step (because it is done)
 		// TODO: check if we can/should merge the arguments "from" and "predecessors"
-		waitingFor.remove(from.step)
+		waitingFor.remove(blocker)
 
 		if (waitingFor.empty) {
 			// waiting is over
@@ -163,7 +163,7 @@ class WActiveStep implements IJob {
 		// record dependency on StepInstance level
 //		eventAcceptor.signalReady(step, this, runNow);
 		tracePredecessor(from.previousResult,
-			if (this.step.hasSameBehavior(from.step))
+			if (this.step.hasSameBehavior(blocker))
 				Predecessor.Type.SEQUENTIAL
 			else
 				Predecessor.Type.UNBLOCK
