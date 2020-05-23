@@ -76,4 +76,14 @@ class WMultiQueue {
 		// reset all instant inputs which are older than tCurrent
 		instantQueues.forEach[clear(tCurrent)]
 	}
+	
+	def List<WMessageQueue.Statistics> getStatistics() {
+		val List<WMessageQueue.Statistics> result = newArrayList
+		val n = queues.size
+		if (n-nInstant > 0) {
+			val qs = queues.subList(nInstant, n).filter(WMessageQueue)	
+			result.addAll(qs.map[statistics.copy])
+		}
+		result
+	}
 }

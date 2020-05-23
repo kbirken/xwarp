@@ -7,8 +7,13 @@ class WMessageQueue implements IQueue {
 	
 	val Deque<WMessage> queue = newLinkedList
 	val WQueueConfig.Limit limit
-	var int highWatermark
-	var int nOverflows
+	
+	public static class Statistics implements Cloneable {
+		public int highWatermark = 0
+		public int nOverflows = 0
+		def copy() { this.clone as Statistics}
+	}
+	val Statistics statistics
 	
 	new() {
 		this(null)
@@ -16,8 +21,7 @@ class WMessageQueue implements IQueue {
 	
 	new(WQueueConfig.Limit limit) {
 		this.limit = limit
-		this.highWatermark = 0
-		this.nOverflows = 0
+		this.statistics = new Statistics
 	}
 	
 	override isEmpty() {
@@ -29,12 +33,12 @@ class WMessageQueue implements IQueue {
 			queue.add(message)
 
 			// record high-watermark statistics
-			if (queue.size > highWatermark)
-				highWatermark = queue.size
+			if (queue.size > statistics.highWatermark)
+				statistics.highWatermark = queue.size
 			return PushResult.OK			
 		} else {
 			// queue is full, handle situation according to policy
-			nOverflows++
+			statistics.nOverflows++
 			switch (limit.policy) {
 				case DISCARD_INCOMING:
 					// just don't add new message into queue
@@ -56,11 +60,7 @@ class WMessageQueue implements IQueue {
 		queue.poll
 	}
 	
-	def getHighWatermark() {
-		highWatermark
-	}
-	
-	def getNOverflows() {
-		nOverflows
-	}
+	def getStatistics() {
+		statistics
+	}	
 }

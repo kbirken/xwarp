@@ -331,6 +331,7 @@ class WActiveBehavior {
 
 	def private void recordResult() {
 		// record result of the execution of this behavior instance
+		result.queueStatistics = queue.statistics
 		recorder.addBehaviorResult(result)
 		result = new BehaviorInstance(behavior)
 	}

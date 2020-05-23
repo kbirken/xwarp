@@ -1,6 +1,8 @@
 package org.nanosite.xwarp.result
 
+import java.util.List
 import org.nanosite.xwarp.model.IBehavior
+import org.nanosite.xwarp.simulation.WMessageQueue
 
 class BehaviorInstance {
 
@@ -9,6 +11,8 @@ class BehaviorInstance {
 	var long tStarted = 0L
 	var long tReady = -1L
 	var long tKilled = -1L
+	
+	var List<WMessageQueue.Statistics> queueStatistics = null
 	
 	new(IBehavior bhvr) {
 		this.behavior = bhvr
@@ -24,6 +28,10 @@ class BehaviorInstance {
 
 	def setKilledTime(long timestamp) {
 		this.tKilled = timestamp
+	}
+	
+	def setQueueStatistics(List<WMessageQueue.Statistics> statistics) {
+		this.queueStatistics = statistics
 	}
 
 	def getBehavior() {
@@ -44,6 +52,13 @@ class BehaviorInstance {
 	
 	def getKilledTime() {
 		this.tKilled
+	}
+	
+	def getQueueStatistics(int idxQueue) {
+		if (idxQueue>=0 && idxQueue<queueStatistics.size)
+			queueStatistics.get(idxQueue)
+		else
+			null
 	}
 	
 	def void dump() {
