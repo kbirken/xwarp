@@ -4,7 +4,7 @@ interface IQueue {
 	public enum PushResult {
 		OK,
 		DISCARDED,
-		DISCARDED_PREVIOUS,
+		DISCARDED_OLDEST,
 		ABORT_SIMULATION
 	}
 	

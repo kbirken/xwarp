@@ -30,8 +30,11 @@ class WMessageQueue implements IQueue {
 	
 	override push(WMessage message, long tCurrent) {
 		if (limit===null || queue.size < limit.nMaxEntries) {
-			queue.add(message)
-
+			if (isStack)
+				queue.addFirst(message)
+			else
+				queue.add(message)
+			
 			// record high-watermark statistics
 			if (queue.size > statistics.highWatermark)
 				statistics.highWatermark = queue.size
@@ -45,9 +48,10 @@ class WMessageQueue implements IQueue {
 					// just don't add new message into queue
 					return PushResult.DISCARDED
 				case LATEST_FIRST: {
-						// add new message at the beginning, this will throw away one older message
-						queue.addFirst(message)
-						return PushResult.DISCARDED_PREVIOUS
+						// a new message at the beginning, this will throw away one older message
+						if (queue.size > 1)
+							queue.removeLast
+						return PushResult.DISCARDED_OLDEST
 					}
 				case SAMPLING: {
 					// ensure that there is always at most one entry in the queue
@@ -75,6 +79,10 @@ class WMessageQueue implements IQueue {
 	
 	def private isSampling() {
 		limit!==null && limit.policy==WQueueConfig.Limit.Policy.SAMPLING
+	}
+	
+	def private isStack() {
+		limit!==null && limit.policy==WQueueConfig.Limit.Policy.LATEST_FIRST
 	}
 	
 	def getStatistics() {

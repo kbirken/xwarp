@@ -11,6 +11,7 @@ import static org.junit.Assert.assertFalse
 import static org.junit.Assert.assertTrue
 import static org.junit.Assert.assertNotNull
 import org.nanosite.xwarp.model.IBehavior
+import org.nanosite.xwarp.result.StepInstance
 
 class TestBase {
 
@@ -105,20 +106,12 @@ class TestBase {
 		long tRunningExpected,
 		long tDoneExpected
 	) {
-		// search for part of step name only
-		val instances = result.stepInstances.filter[qualifiedName.contains(stepName)]
-		assertFalse("Cannot find step result for name '" + stepName + "'", instances.empty)
-
-		assertTrue("Cannot find instance " + instance + " for step for name '" + stepName + "'",
-			instance < instances.size
-		)
-		
-		val si = instances.get(instance)
+		val si = result.retrieveStepInstance(stepName, instance)		
 		assertEquals(tWaitingExpected, si.waitingTime/MS)
 		assertEquals(tRunningExpected, si.runningTime/MS)
 		assertEquals(tDoneExpected, si.doneTime/MS)
 	}
-
+	
 	def protected checkMaxIterations(ISimResult result, boolean expected) {
 		assertEquals(expected, result.reachedMaxIterations)
 	}
@@ -149,6 +142,20 @@ class TestBase {
 		assertEquals(nOverflowsExpected, stat.nOverflows)
 	}
 
+	def protected checkPredecessor(
+		ISimResult result,
+		String stepName,
+		int instance,
+		String predName,
+		int predInstance
+	) {
+		val si = result.retrieveStepInstance(stepName, instance)		
+		val predi = result.retrieveStepInstance(predName, predInstance)
+		assertTrue("Cannot find predecessor for step",
+			si.predecessors.map[it.stepInstance].toList.contains(predi)
+		)			
+	}
+	
 	def protected checkPool(
 		ISimResult result,
 		String poolName,
@@ -199,4 +206,16 @@ class TestBase {
 		val si = instances.get(instance)
 		assertEquals(nMissingCyclesExpected, si.NMissingCycles)		
 	}
+	
+	def private StepInstance retrieveStepInstance(ISimResult result, String stepName, int instance) {
+		// search for part of step name only
+		val instances = result.stepInstances.filter[qualifiedName.contains(stepName)]
+		assertFalse("Cannot find step result for name '" + stepName + "'", instances.empty)
+
+		assertTrue("Cannot find instance " + instance + " for step for name '" + stepName + "'",
+			instance < instances.size
+		)
+		instances.get(instance)
+	}
+
 }
