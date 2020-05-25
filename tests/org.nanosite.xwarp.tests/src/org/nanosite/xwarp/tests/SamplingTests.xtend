@@ -13,10 +13,10 @@ class SamplingTests extends TestBase {
 		// create software model
 		val consumer1 = consumer("Comp1") => [
 			add(
-				// there are two timer ticks executed sequentially
+				// this is a timer tick, triggering itself (infinite loop)
 				behavior("Timer") => [
 					add(step("T", 100))
-					send("Timer", 0)
+					send("Timer")
 					send("Algo", 0)
 				],
 				// this is a data producer
