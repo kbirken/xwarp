@@ -88,7 +88,7 @@ class WActiveBehavior {
 	 * depending on the configuration of the queue.</p> 
 	 */
 	def private void getNextFromQueue(boolean isFollowup) {
-		if (queue.mayPop) {
+		if (queue.mayPop(scheduler.currentTime)) {
 			val msgs = queue.pop
 			currentMessage = msgs.merge
 							

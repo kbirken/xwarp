@@ -10,6 +10,7 @@ import static org.junit.Assert.assertEquals
 import static org.junit.Assert.assertFalse
 import static org.junit.Assert.assertTrue
 import static org.junit.Assert.assertNotNull
+import org.nanosite.xwarp.model.IBehavior
 
 class TestBase {
 
@@ -131,6 +132,21 @@ class TestBase {
 		assertNotNull(qoa)
 		assertEquals(expectedBehavior, qoa.behavior.qualifiedName)
 		assertEquals(expectedInputIndex, qoa.inputIndex)
+	}
+	
+	def protected checkQueueStatistics(
+		ISimResult result,
+		IBehavior bhvr,
+		int indexQueue,
+		int highWatermarkExpected,
+		int nOverflowsExpected
+	) {
+		val candidates = result.behaviorInstances.filter[it.behavior==bhvr]
+		assertFalse("Cannot find behavior instance", candidates.empty)
+		val bi = candidates.last
+		val stat = bi.getQueueStatistics(indexQueue)
+		assertEquals(highWatermarkExpected, stat.highWatermark)
+		assertEquals(nOverflowsExpected, stat.nOverflows)
 	}
 
 	def protected checkPool(

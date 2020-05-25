@@ -35,7 +35,11 @@ class WMultiQueue {
 		return queues.get(idx).push(msg, tCurrent)
 	}
 	
-	def boolean mayPop() {
+	def boolean mayPop(long tCurrent) {
+		// ensure that all outdated instant events are removed 
+		flushInstants(tCurrent)
+		
+		// check if multi-event is available (based on strategy)
 		switch (strategy) {
 			case ONE_OF_EACH: {
 				queues.forall[!empty]

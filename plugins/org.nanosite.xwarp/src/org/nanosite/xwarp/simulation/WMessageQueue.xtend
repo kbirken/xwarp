@@ -38,7 +38,8 @@ class WMessageQueue implements IQueue {
 			return PushResult.OK			
 		} else {
 			// queue is full, handle situation according to policy
-			statistics.nOverflows++
+			if (! isSampling)
+				statistics.nOverflows++
 			switch (limit.policy) {
 				case DISCARD_INCOMING:
 					// just don't add new message into queue
@@ -48,6 +49,12 @@ class WMessageQueue implements IQueue {
 						queue.addFirst(message)
 						return PushResult.DISCARDED_PREVIOUS
 					}
+				case SAMPLING: {
+					// ensure that there is always at most one entry in the queue
+					queue.clear
+					queue.add(message)
+					return PushResult.OK
+				}
 				case ABORT_SIMULATION:
 					return PushResult.ABORT_SIMULATION
 				default:
@@ -57,7 +64,17 @@ class WMessageQueue implements IQueue {
 	}
 	
 	override pop() {
-		queue.poll
+		if (isSampling) {
+			// in SAMPLING mode, we keep the event from the queue
+			queue.peek
+		} else {
+			// "normal" queue: remove the event from the queue
+			queue.poll		
+		}
+	}
+	
+	def private isSampling() {
+		limit!==null && limit.policy==WQueueConfig.Limit.Policy.SAMPLING
 	}
 	
 	def getStatistics() {
