@@ -205,6 +205,10 @@ class WActiveBehavior {
 		// TODO: we could add checking the queue here and ensure that the behavior will
 		// execute again if necessary. Without this it will be triggered on the next incoming message only.
 	}
+	
+	def boolean isPartOfNoProgressInfiniteLoop() {
+		behavior.partOfNoProgressInfiniteLoop
+	}
 
 	def private void signalUnlessCondition(WActiveStep signalledBy) {
 		// we simply clear unless condition (forever)

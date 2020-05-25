@@ -18,4 +18,7 @@ interface IBehavior extends IStepSuccessor, INamed {
 	def boolean isLastStep(IStep step)
 
 	def List<ITrigger> getSendTriggers()
+	
+	def boolean executesInZeroTime()
+	def boolean isPartOfNoProgressInfiniteLoop()
 }

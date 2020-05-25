@@ -46,6 +46,10 @@ class StepInstance {
 			this.stepInstance = stepInstance
 			this.type = type
 		}
+		
+		override String toString() {
+			'''«type»:«stepInstance.toString»'''
+		}
 	}
 	
 	val List<Predecessor> predecessors = newArrayList

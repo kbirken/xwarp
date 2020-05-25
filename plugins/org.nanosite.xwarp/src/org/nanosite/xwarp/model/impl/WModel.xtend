@@ -2,7 +2,10 @@ package org.nanosite.xwarp.model.impl
 
 import com.google.common.collect.ImmutableList
 import java.util.List
+import java.util.Map
+import java.util.Set
 import org.nanosite.xwarp.model.IAllocatingConsumable
+import org.nanosite.xwarp.model.IBehavior
 import org.nanosite.xwarp.model.IConsumer
 import org.nanosite.xwarp.model.IModel
 import org.nanosite.xwarp.model.IScheduledConsumable
@@ -51,6 +54,7 @@ class WModel implements IModel {
 
 	def void finishInitialisation() {
 		consumers.forEach[finishInitialisation]
+		checkForCycles()
 		initialized = true
 	}
 
@@ -78,4 +82,48 @@ class WModel implements IModel {
 		ImmutableList.copyOf(consumers)
 	}
 	
+	// we are using DFS for cycle detection
+	enum Color { WHITE, GRAY, BLACK}
+	
+	def private checkForCycles() {
+		// initialize
+		val Map<IBehavior, Color> color = newHashMap
+		val allBehaviors = consumers.map[behaviors].flatten
+		allBehaviors.forEach[color.put(it, Color.WHITE)]
+		
+		// start depth-first traversal with initial triggers
+		for(bhvr : initial.map[behavior].filter[executesInZeroTime]) {
+			checkCycleRec(bhvr, color)
+		}
+		
+		// set flag for all behaviors which are part of infinite loop
+		for(bhvr : allBehaviors.filter[color.get(it)==Color.GRAY]) {
+			//println("in cycle: " + bhvr.qualifiedName)
+			(bhvr as WBehavior).setNoProgressLoop
+		}
+	}
+	
+	def private boolean checkCycleRec(IBehavior bhvr, Map<IBehavior, Color> color) {
+		// mark as being processed
+		color.put(bhvr, Color.GRAY)
+		
+		// iterate over triggers
+		for (b : bhvr.sendTriggers.map[behavior].filter[executesInZeroTime]) {
+			val col = color.get(b)
+			if (col == Color.GRAY) {
+				// this is a cycle
+				return true
+			}
+				
+			if (col == Color.WHITE) {
+				if (checkCycleRec(b, color)) {
+					return true
+				}
+			}
+		}
+		
+		// mark as processed
+		color.put(bhvr, Color.BLACK)
+		false
+	}
 }

@@ -176,7 +176,8 @@ class WSimulator implements IScheduler {
 	
 			// handle current set of ready steps
 			for (job : todo) {
-				visited.add(job)
+				if (job.checkForNoProgress)
+					visited.add(job)
 				
 				if (job.shouldLog)
 					log(1, ILogger.Type.RUNNING, job.qualifiedName)

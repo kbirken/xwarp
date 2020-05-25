@@ -131,6 +131,11 @@ class WActiveStep implements IJob {
 		result = createResultInstance
 		init(false)
 	}
+	
+	override boolean checkForNoProgress() {
+		behavior.isPartOfNoProgressInfiniteLoop
+	}
+	
 
 	def void triggerWaiting(WActiveStep from, IScheduler scheduler) {
 		val blocker = from.step

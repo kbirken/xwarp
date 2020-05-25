@@ -1,11 +1,11 @@
 package org.nanosite.xwarp.model.impl
 
+import com.google.common.collect.ImmutableList
 import java.util.List
 import org.nanosite.xwarp.model.IBehavior
 import org.nanosite.xwarp.model.IStep
-import com.google.common.collect.ImmutableList
-import org.nanosite.xwarp.model.WQueueConfig
 import org.nanosite.xwarp.model.ITrigger
+import org.nanosite.xwarp.model.WQueueConfig
 
 class WBehavior extends WNamedElement implements IBehavior {
 	
@@ -22,7 +22,9 @@ class WBehavior extends WNamedElement implements IBehavior {
 	// number of execution cycles needed for validating incoming messages
 	var int nRequiredCycles = 1
 	
-	WConsumer owner = null 
+	var boolean isPartOfNoProgressLoop = false
+	
+	WConsumer owner = null
 	
 	new(String name, boolean addToken) {
 		this(name, WQueueConfig.STANDARD, 1, addToken)
@@ -54,6 +56,10 @@ class WBehavior extends WNamedElement implements IBehavior {
 	
 	def setOwner(WConsumer owner) {
 		this.owner = owner
+	}
+	
+	def setNoProgressLoop() {
+		this.isPartOfNoProgressLoop = true
 	}
 
 	def void finishInitialisation() {
@@ -138,7 +144,17 @@ class WBehavior extends WNamedElement implements IBehavior {
 		ImmutableList.copyOf(sendTriggers)
 	}
 
+	override def executesInZeroTime() {
+		steps.forall[!it.hasNonPoolNeeds]
+	}
+
+	override isPartOfNoProgressInfiniteLoop() {
+		this.isPartOfNoProgressLoop
+	}
+	
+	
 	override String toString() {
 		'''WBehavior(«if (owner!==null) qualifiedName else name»)'''
 	}
+	
 }

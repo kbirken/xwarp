@@ -37,6 +37,7 @@ interface IStep extends IStepSuccessor, INamed {
 	def List<IStepSuccessor> getSuccessors()
 	def List<IStep> getPredecessors()
 	
+	/** If the step has no non-pool needs, it will execute in zero time. */
 	def boolean hasNonPoolNeeds()
 	def void copyNonPoolNeeds(Map<IScheduledConsumable, IConsumableAmount> nonPoolNeedsCopy)
 	def long getResourcePenalty(IResource resource)
