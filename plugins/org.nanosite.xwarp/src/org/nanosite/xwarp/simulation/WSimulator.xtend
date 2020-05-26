@@ -19,6 +19,9 @@ class WSimulator implements IScheduler {
 	/** maximum number of iterations */
 	var nMaxIter = 1999
 
+	/** maximum number of ready-list-updates per iteration */
+	var nMaxReadyListUpdates = 50
+
 	/** constant for "no simulated time limit" */
 	val static tLimitNone = -1L
 	
@@ -158,7 +161,10 @@ class WSimulator implements IScheduler {
 	) {
 		// transfer ready steps to running (this might lead to new ready steps in between)
 		val Set<IJob> visited = newHashSet
-		while (!readyList.empty) {
+		var iReadyListUpdate = 0
+		while ((!readyList.empty) && (iReadyListUpdate<nMaxReadyListUpdates)) {
+			iReadyListUpdate++
+			
 			// if the same job shows up in the ready list twice in the same iteration, 
 			// this is a cycle without progress. We have to kill it in order to avoid an endless loop.
 			val cyclic = Sets.intersection(visited, readyList.toSet)
@@ -207,6 +213,10 @@ class WSimulator implements IScheduler {
 			}
 		}
 	
+		if (iReadyListUpdate >= nMaxReadyListUpdates) {
+			logger.fatal('''reached the limit on ready-list updates, simulation aborted''')
+			return false
+		}
 	
 		// compute sum of requests of all 'running' steps for each ResourceSlot (absolute value and count)
 //		CResourceVector sums;
