@@ -47,18 +47,18 @@ class WMessageQueue implements IQueue {
 				case DISCARD_INCOMING:
 					// just don't add new message into queue
 					return PushResult.DISCARDED
-				case LATEST_FIRST: {
-						// a new message at the beginning, this will throw away one older message
-						if (queue.size > 1)
-							queue.removeLast
-						return PushResult.DISCARDED_OLDEST
-					}
 				case SAMPLING: {
 					// ensure that there is always at most one entry in the queue
 					queue.clear
 					queue.add(message)
 					return PushResult.OK
 				}
+				case LATEST_FIRST: {
+						// a new message at the beginning, this will throw away one older message
+						if (queue.size > 1)
+							queue.removeLast
+						return PushResult.DISCARDED_OLDEST
+					}
 				case ABORT_SIMULATION:
 					return PushResult.ABORT_SIMULATION
 				default:

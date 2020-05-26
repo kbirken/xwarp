@@ -10,11 +10,11 @@ class WQueueConfig {
 			// discard incoming events if queue is full
 			DISCARD_INCOMING,
 			
-			// always put new events at the top of the queue (stack behavior)
-			LATEST_FIRST,
-			
 			// always replace first event at the top of the queue and don't pop it
 			SAMPLING,
+			
+			// always put new events at the top of the queue (stack behavior)
+			LATEST_FIRST,
 			
 			// force end of simulation if queue is overloaded
 			ABORT_SIMULATION
