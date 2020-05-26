@@ -91,8 +91,8 @@ class WModel implements IModel {
 		val allBehaviors = consumers.map[behaviors].flatten
 		allBehaviors.forEach[color.put(it, Color.WHITE)]
 		
-		// start depth-first traversal with initial triggers
-		for(bhvr : initial.map[behavior].filter[executesInZeroTime]) {
+		// start depth-first traversal for all behaviors which are candidates
+		for(bhvr : allBehaviors.filter[executesInZeroTime]) {
 			checkCycleRec(bhvr, color)
 		}
 		
