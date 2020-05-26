@@ -160,21 +160,21 @@ class WSimulator implements IScheduler {
 		int nIteration
 	) {
 		// transfer ready steps to running (this might lead to new ready steps in between)
-		val Set<IJob> visited = newHashSet
 		var iReadyListUpdate = 0
 		while ((!readyList.empty) && (iReadyListUpdate<nMaxReadyListUpdates)) {
 			iReadyListUpdate++
 			
-			// if the same job shows up in the ready list twice in the same iteration, 
-			// this is a cycle without progress. We have to kill it in order to avoid an endless loop.
-			val cyclic = Sets.intersection(visited, readyList.toSet)
-			for(job : cyclic) {
+			// detect jobs which lead into infinite loops without progress 
+			// and kill them in order to avoid a never-ending while(readyList)-loop
+			val Set<IJob> leadsToInfiniteLoop = newHashSet
+			leadsToInfiniteLoop.addAll(readyList.filter[isPartOfNoProgressInfiniteLoop])
+			for(job : leadsToInfiniteLoop) {
 				logger.error(
-					'''cyclic dependency in current iteration, killed «job.qualifiedName»'''
+					'''detected infinite execution without progress, killed «job.qualifiedName»'''
 				)
 				job.notifyKilled
 			}
-			readyList.removeAll(cyclic)
+			readyList.removeAll(leadsToInfiniteLoop)
 			
 			// copy ready list because loop might insert new jobs
 			val todo = readyList.clone
@@ -182,9 +182,6 @@ class WSimulator implements IScheduler {
 	
 			// handle current set of ready steps
 			for (job : todo) {
-				if (job.checkForNoProgress)
-					visited.add(job)
-				
 				if (job.shouldLog)
 					log(1, ILogger.Type.RUNNING, job.qualifiedName)
 				//_runningMap[step] = _time;

@@ -45,6 +45,7 @@ class InfiniteLoopTests extends TestBase {
 		// create software model
 		val consumer1 = consumer("Comp1") => [
 			add(
+				// two behaviors forming an infinite loop without progress in simulated time
 				behavior("Bhvr1") => [
 					add(step("S1", 0L))
 					send("Bhvr2")
@@ -64,10 +65,9 @@ class InfiniteLoopTests extends TestBase {
 		]
 		
 		// create simulator and run simulation
-		val result = simulate(model, 2, 1, false)
+		val result = simulate(model, 0, 1, false)
 		result.checkMaxIterations(false)
-		result.check("Bhvr1::S1", 0, 0, 0)
-		result.check("Bhvr2::S1", 0, 0, 0)
+		// simulator statically detects infinite loop and aborts without executing anything
 	}
 
 	@Test
@@ -97,6 +97,7 @@ class InfiniteLoopTests extends TestBase {
 		// create simulator and run simulation
 		val result = simulate(model, 0, 1, false)
 		result.checkMaxIterations(false)
+		// simulator statically detects infinite loop and aborts without executing anything
 	}
 
 }

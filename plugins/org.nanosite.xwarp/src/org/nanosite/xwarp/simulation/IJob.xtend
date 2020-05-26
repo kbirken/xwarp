@@ -27,7 +27,7 @@ interface IJob {
 	def void exitActions(IResultRecorder recorder)
 	def void notifyKilled()
 	
-	def boolean checkForNoProgress()
+	def boolean isPartOfNoProgressInfiniteLoop()
 	
 	def void traceWaiting(long timestamp)
 	def void traceReady(long timestamp)

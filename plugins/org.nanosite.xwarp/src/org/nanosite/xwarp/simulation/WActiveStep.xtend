@@ -132,7 +132,7 @@ class WActiveStep implements IJob {
 		init(false)
 	}
 	
-	override boolean checkForNoProgress() {
+	override boolean isPartOfNoProgressInfiniteLoop() {
 		behavior.isPartOfNoProgressInfiniteLoop
 	}
 	
