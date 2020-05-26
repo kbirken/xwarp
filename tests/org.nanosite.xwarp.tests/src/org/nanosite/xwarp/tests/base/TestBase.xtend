@@ -138,8 +138,8 @@ class TestBase {
 		assertFalse("Cannot find behavior instance", candidates.empty)
 		val bi = candidates.last
 		val stat = bi.getQueueStatistics(indexQueue)
-		assertEquals(highWatermarkExpected, stat.highWatermark)
-		assertEquals(nOverflowsExpected, stat.nOverflows)
+		assertEquals("Invalid highwatermark for queue, ", highWatermarkExpected, stat.highWatermark)
+		assertEquals("Invalid #overflows for queue, ", nOverflowsExpected, stat.nOverflows)
 	}
 
 	def protected checkPredecessor(

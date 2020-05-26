@@ -7,13 +7,16 @@ class WQueueConfig {
 
 	static public class Limit {
 		public enum Policy {
-			// discard incoming events if queue is full
+			// discard incoming event if queue is full
 			DISCARD_INCOMING,
+			
+			// discard oldest event if queue is full
+			DISCARD_OLDEST,
 			
 			// always replace first event at the top of the queue and don't pop it
 			SAMPLING,
 			
-			// always put new events at the top of the queue (stack behavior)
+			// always put new event at the top of the queue (stack behavior)
 			LATEST_FIRST,
 			
 			// force end of simulation if queue is overloaded

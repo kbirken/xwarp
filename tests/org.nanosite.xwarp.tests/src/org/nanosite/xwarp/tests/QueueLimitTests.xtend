@@ -38,6 +38,56 @@ class QueueLimitTests extends TestBase {
 	}
 
 	@Test
+	def void testQueueOverflow_PolicyDiscardOldest() {
+		// create software model
+		val consumer1 = consumer("Comp1") => [
+			add(
+				// driver just passes through all messages
+				behavior("Driver") => [
+					add(step("D", 10L))
+					send("Worker")
+				],
+				// worker will not be able to handle all messages in time
+				behavior("Worker",
+					queueConfig(limit(2, DISCARD_OLDEST))
+				) => [
+					add(step("W", 100L))
+				]
+			)
+		]
+
+		// build model to be simulated
+		val driver = consumer1.behaviors.get(0)
+		val worker = consumer1.behaviors.get(1)
+		val model = model => [
+			add(consumer1)
+			for(i : 1..5)
+				addInitial(driver)
+		]
+		
+		// create simulator and run simulation
+		val result = simulate(model, 8, false)
+		// triggers #1 and #2 will be discarded because queue is full
+		result.checkQueueStatistics(worker, 0, 2, 2)
+		result.check("Comp1::Driver::D", 0,   0,   0,  10)
+		result.check("Comp1::Driver::D", 1,  10,  10,  20)
+		result.check("Comp1::Driver::D", 2,  20,  20,  30)
+		result.check("Comp1::Driver::D", 3,  30,  30,  40)
+		result.check("Comp1::Driver::D", 4,  40,  40,  50)
+		result.check("Comp1::Driver::D", 0,   0,   0,  10)
+		result.check("Comp1::Driver::D", 0,   0,   0,  10)
+		result.check("Comp1::Driver::D", 0,   0,   0,  10)
+		result.check("Comp1::Worker::W", 0,  10,  10, 110)
+		result.check("Comp1::Worker::W", 1, 110, 110, 210)
+		result.check("Comp1::Worker::W", 2, 210, 210, 310)
+		
+		// check predecessors
+		result.checkPredecessor("Comp1::Worker::W", 0, "Comp1::Driver::D", 0)
+		result.checkPredecessor("Comp1::Worker::W", 1, "Comp1::Driver::D", 3)
+		result.checkPredecessor("Comp1::Worker::W", 2, "Comp1::Driver::D", 4)
+	}
+
+	@Test
 	def void testInstantQueueOverflow_PolicyAbort() {
 		// create software model
 		val consumer1 = consumer("Comp1") => [

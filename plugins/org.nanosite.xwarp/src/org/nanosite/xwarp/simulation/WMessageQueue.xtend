@@ -44,9 +44,16 @@ class WMessageQueue implements IQueue {
 			if (! isSampling)
 				statistics.nOverflows++
 			switch (limit.policy) {
-				case DISCARD_INCOMING:
+				case DISCARD_INCOMING: {
 					// just don't add new message into queue
 					return PushResult.DISCARDED
+				}
+				case DISCARD_OLDEST: {
+					// remove the entry at the top of the queue
+					queue.removeFirst
+					queue.add(message)
+					return PushResult.DISCARDED_OLDEST
+				}
 				case SAMPLING: {
 					// ensure that there is always at most one entry in the queue
 					queue.clear
@@ -54,11 +61,11 @@ class WMessageQueue implements IQueue {
 					return PushResult.OK
 				}
 				case LATEST_FIRST: {
-						// a new message at the beginning, this will throw away one older message
-						if (queue.size > 1)
-							queue.removeLast
-						return PushResult.DISCARDED_OLDEST
-					}
+					// a new message at the beginning, this will throw away one older message
+					if (queue.size > 1)
+						queue.removeLast
+					return PushResult.DISCARDED_OLDEST
+				}
 				case ABORT_SIMULATION:
 					return PushResult.ABORT_SIMULATION
 				default:
