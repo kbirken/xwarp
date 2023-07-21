@@ -13,3 +13,11 @@ jobs:
       uses: gradle/gradle-build-action@v2
     - name: Run build with gradle wrapper
       run: ./gradlew build
+    - name: Publish test report
+      uses: mikepenz/action-junit-report@v3
+      with:
+      check_name: "Test Results"
+      report_paths: '**/target/surefire-reports/*.xml'
+      fail_on_failure: true
+      summary: true
+      detailed_summary: true
