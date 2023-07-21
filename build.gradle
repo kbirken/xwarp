@@ -11,6 +11,9 @@ plugins {
   	id "org.xtext.xtend" version "4.0.0"
 }
 
+version = '1.0-SNAPSHOT'
+group = 'org.nanosite.xwarp'
+
 repositories {
     // Use Maven Central for resolving dependencies.
     mavenCentral()
