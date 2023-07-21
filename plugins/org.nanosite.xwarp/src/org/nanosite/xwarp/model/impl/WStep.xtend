@@ -137,7 +137,7 @@ class WStep extends WAbstractStep {
 			0L
 	}
 
-	override def Map<IPool, Long> getPoolNeeds() {
+	override Map<IPool, Long> getPoolNeeds() {
 		poolNeeds
 	}
 	

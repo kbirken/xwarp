@@ -3,7 +3,6 @@ package org.nanosite.xwarp.model.impl
 import com.google.common.collect.ImmutableList
 import java.util.List
 import java.util.Map
-import java.util.Set
 import org.nanosite.xwarp.model.IAllocatingConsumable
 import org.nanosite.xwarp.model.IBehavior
 import org.nanosite.xwarp.model.IConsumer

@@ -8,7 +8,7 @@ interface IScheduler {
 	 * This exception will be triggered by some behavior
 	 * in order to abort the whole simulation if a queue is full.
 	 */
-	public static class QueueAbortException extends RuntimeException {
+	static class QueueAbortException extends RuntimeException {
 		public val IBehavior behavior
 		public val int inputIndex
 		

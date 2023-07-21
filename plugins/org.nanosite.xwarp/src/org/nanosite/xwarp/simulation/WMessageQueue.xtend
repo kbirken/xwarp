@@ -8,7 +8,7 @@ class WMessageQueue implements IQueue {
 	val Deque<WMessage> queue = newLinkedList
 	val WQueueConfig.Limit limit
 	
-	public static class Statistics implements Cloneable {
+	static class Statistics implements Cloneable {
 		public int highWatermark = 0
 		public int nOverflows = 0
 		def copy() { this.clone as Statistics}

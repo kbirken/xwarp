@@ -1,7 +1,7 @@
 package org.nanosite.xwarp.simulation
 
 interface IQueue {
-	public enum PushResult {
+	enum PushResult {
 		OK,
 		DISCARDED,
 		DISCARDED_OLDEST,
