@@ -144,7 +144,7 @@ class WBehavior extends WNamedElement implements IBehavior {
 		ImmutableList.copyOf(sendTriggers)
 	}
 
-	override def executesInZeroTime() {
+	override executesInZeroTime() {
 		steps.forall[!it.hasNonPoolNeeds]
 	}
 

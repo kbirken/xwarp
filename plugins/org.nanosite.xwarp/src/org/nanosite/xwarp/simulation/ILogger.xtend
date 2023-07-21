@@ -1,7 +1,7 @@
 package org.nanosite.xwarp.simulation
 
 interface ILogger {
-	public enum Type {
+	enum Type {
 		TOKINFO,
 		TOKEN,
 		POOL,

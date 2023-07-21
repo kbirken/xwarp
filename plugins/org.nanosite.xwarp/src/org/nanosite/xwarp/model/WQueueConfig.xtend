@@ -5,8 +5,8 @@ import java.util.Map
 class WQueueConfig {
 	enum Strategy { ONE_OF_EACH, FIRST_AVAILABLE }
 
-	static public class Limit {
-		public enum Policy {
+	static class Limit {
+		enum Policy {
 			// discard incoming event if queue is full
 			DISCARD_INCOMING,
 			
@@ -38,7 +38,7 @@ class WQueueConfig {
 	val Strategy strategy
 	val Map<Integer, Limit> limits
 	
-	public final static val WQueueConfig STANDARD =
+	public static val WQueueConfig STANDARD =
 		new WQueueConfig(1, Strategy.FIRST_AVAILABLE)
   
 	new(int nQueues, Strategy strategy) {

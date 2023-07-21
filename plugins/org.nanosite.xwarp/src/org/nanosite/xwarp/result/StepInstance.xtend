@@ -18,8 +18,8 @@ class StepInstance {
 	var long tRunning = 0L
 	var long tDone = 0L
 	
-	static public class Predecessor {
-		public enum Type {
+	static class Predecessor {
+		enum Type {
 			// sequential execution of steps in the same behavior
 			SEQUENTIAL,
 			

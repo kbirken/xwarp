@@ -17,7 +17,7 @@ interface ISimResult {
 	def boolean reachedMaxIterations()
 	def boolean reachedTimeLimit()
 
-	public static class QueueOverflow {
+	static class QueueOverflow {
 		public IBehavior behavior
 		public int inputIndex
 		new(IBehavior behavior, int inputIndex) {
