@@ -1,4 +1,4 @@
-name: Build xwarp with gradle
+name: Build xwarp library
 
 on:
   push:
