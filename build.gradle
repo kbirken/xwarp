@@ -9,6 +9,7 @@ plugins {
     // Apply the java-library plugin for API and implementation separation.
     id 'java-library'
   	id "org.xtext.xtend" version "4.0.0"
+    id 'maven-publish'
 }
 
 version = '1.0-SNAPSHOT'
@@ -45,4 +46,19 @@ sourceSets {
     test.java.srcDirs = ['tests/org.nanosite.xwarp.tests/src', 'tests/org.nanosite.xwarp.tests/xtend-gen']
     test.xtend.outputDir = 'tests/org.nanosite.xwarp.tests/xtend-gen'
 }
+
+
+publishing {
+  repositories {
+    maven {
+      name = "GitHubPackages"
+      url = "https://maven.pkg.github.com/kbirken/xwarp"
+      credentials {
+        username = System.getenv("GITHUB_ACTOR")
+        password = System.getenv("GITHUB_TOKEN")
+      }
+    }
+  }
+}
+
 
