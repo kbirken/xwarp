@@ -10,7 +10,7 @@ jobs:
     - name: Checkout project sources
       uses: actions/checkout@v3
     - name: Setup gradle
-      uses: gradle/gradle-build-action@v2
+      uses: gradle/gradle-build-action@v2.4.2
     - name: Run build with gradle wrapper
       run: ./gradlew build
     - name: Publish test report
