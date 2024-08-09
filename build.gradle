@@ -50,6 +50,18 @@ sourceSets {
     test.xtend.outputDir = 'tests/org.nanosite.xwarp.tests/xtend-gen'
 }
 
+ext.additionalPomInfo = {
+    licenses {
+        // official SPDX identifier
+        // see https://spdx.org/licenses/ for list
+        license {
+            name = "MPL-2.0"
+	    url = "http://www.mozilla.org/MPL/2.0"
+            comments = "Mozilla Public License 2.0"
+            distribution = "repo"
+        }
+    }
+}
 
 publishing {
     repositories {
@@ -66,6 +78,7 @@ publishing {
     publications {
         maven(MavenPublication) {
             from components.java
+	    pom additionalPomInfo
         }
     }
 }
